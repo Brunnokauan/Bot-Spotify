@@ -1,2 +1,2 @@
 # Bot-Spotify
- Bot para o Discord com integrado com a API do Spotify.
+ Bot para o Discord integrado com a API do Spotify.
