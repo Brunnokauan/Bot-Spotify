@@ -1,15 +1,13 @@
 import spotipy.util as util
-from spotipy.oauth2 import SpotifyOAuth
+# from spotipy.oauth2 import SpotifyOAuth
 from dotenv import load_dotenv
 import os
 # import spotipy
-# from requests import post, get
 import requests
-# import json
 
 username = 'bot-spotify'
 redirect_uri = 'http://localhost:8888/callback'
-scope = 'user-top-read'
+scope = 'user-top-read playlist-modify-private user-modify-playback-state'
 
 load_dotenv()
 
@@ -25,7 +23,11 @@ def web_api(endpoint, method, body):
         res = requests.get(url=f"https://api.spotify.com/{endpoint}", headers={"Authorization": f"Bearer {token}"})
     elif (method == 'post'):
         res = requests.post(url=f"https://api.spotify.com/{endpoint}",
-              headers={"Authorization": f'Bearer {token}', "Content-Type": "application/x-www-form-urlencoded"},
+              headers={"Authorization": f'Bearer {token}', "Content-Type": "application/application/json"},
+              json=body)
+    elif (method == 'put'):
+        res = requests.post(url=f"https://api.spotify.com/{endpoint}",
+              headers={"Authorization": f'Bearer {token}', "Content-Type": "application/application/json"},
               json=body)
     return res.json()
 
