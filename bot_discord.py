@@ -30,9 +30,9 @@ client = MyClient(intents=intents)
 
 tree = app_commands.CommandTree(client)
 # Digita comando
-@tree.command(guild=discord.Object(id=1077791239732199575), name='top5', description='Top 5 músicas mais ouvidas deste mês')
-async def top5(interaction: discord.Interaction):
-    await interaction.response.send_message(top_five(), ephemeral=True)
+@tree.command(guild=discord.Object(id=1077791239732199575), name='topSongs', description='Top músicas mais ouvidas deste mês')
+async def topSongs(interaction: discord.Interaction, num:int=5):
+    await interaction.response.send_message(top_five(num), ephemeral=True)
 
 # Seleciona comando. OBS: clique botão direito minha mensagem, em apps
 # @tree.context_menu(name="Teste", guild=discord.Object(id=1077791239732199575))

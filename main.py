@@ -1,20 +1,23 @@
 from access import web_api
 import os
 
-def top_five():
-    top_tracks = web_api('v1/me/top/tracks?time_range=short_term&limit=5','get', None)
+def top_five(qtd_songs):
+    top_tracks = web_api(f'v1/me/top/tracks?time_range=short_term&limit={qtd_songs}','get', None)
     result = ''
     for n, song in enumerate(top_tracks['items']):
         music = f"{n+1}. {song['name']} - " 
         artist = ''
-        for artists in top_tracks['items'][n]['artists']:
-            text1 = f"{artists['name']}, " 
-            artist += text1 
-        result += music + artist 
-        if n != 4:
+        for a, artists in enumerate(top_tracks['items'][n]['artists']):
+            if a+1 != len(top_tracks['items'][n]['artists']):
+                text1 = f"{artists['name']}, " 
+            else:
+                text1 = f"{artists['name']}" 
+            artist += text1
+        result += music + artist
+        if n != qtd_songs-1:
             result += os.linesep
         # print(song['artists'][0]['name'])
-    return f'**TOP 5 MÚSICAS MAIS OUVIDAS DESTE MÊS:**{os.linesep}' + result
+    return f'**TOP {qtd_songs} MÚSICAS MAIS OUVIDAS DESTE MÊS:**{os.linesep}' + result
 
 def recomendation():
     topTracksIds = ['4Bb53fsDAero14LpAbsmft','2CgOd0Lj5MuvOqzqdaAXtS','3gB0fkEzOzV0kEWuQBFweu','42xnrDAQcU0208y6iGR5Ls','5kvFBu6jDJMECOqmD7OwUx']
