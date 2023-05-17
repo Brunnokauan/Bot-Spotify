@@ -1,8 +1,9 @@
-from access import web_api
+from access import web_api, autorization
 import os
 
-def top_five(qtd_songs):
-    top_tracks = web_api(f'v1/me/top/tracks?time_range=short_term&limit={qtd_songs}','get', None)
+def top_songs(qtd_songs):
+    token = autorization()
+    top_tracks = web_api(token,f'v1/me/top/tracks?time_range=short_term&limit={qtd_songs}','GET')
     result = ''
     for n, song in enumerate(top_tracks['items']):
         music = f"{n+1}. {song['name']} - " 
@@ -22,7 +23,8 @@ def top_five(qtd_songs):
 def recomendation():
     topTracksIds = ['4Bb53fsDAero14LpAbsmft','2CgOd0Lj5MuvOqzqdaAXtS','3gB0fkEzOzV0kEWuQBFweu','42xnrDAQcU0208y6iGR5Ls','5kvFBu6jDJMECOqmD7OwUx']
 
-    new_songs = web_api(f"v1/recommendations?limit=5&seed_tracks={','.join(topTracksIds)}", 'get', None)
+    token = autorization()
+    new_songs = web_api(token, f"v1/recommendations?limit=5&seed_tracks={','.join(topTracksIds)}", 'GET')
 
     for n, song in enumerate(new_songs['tracks']):
         print(f"{n+1}. {song['name']} by ", end='')
@@ -32,7 +34,9 @@ def recomendation():
 
 def save_playlist():
     tracksURI = ['spotify:track:4Bb53fsDAero14LpAbsmft','spotify:track:6f0XqZKDhD5EOTziuKYyq1','spotify:track:2CgOd0Lj5MuvOqzqdaAXtS','spotify:track:6wLujYsftQ9tGIvf54lrkz','spotify:track:3gB0fkEzOzV0kEWuQBFweu','spotify:track:4tAMNBZRoR2WQ6UnZs3Uuh','spotify:track:42xnrDAQcU0208y6iGR5Ls','spotify:track:6GiQfK7gtNGlODn53HZvpw','spotify:track:5kvFBu6jDJMECOqmD7OwUx','spotify:track:7fcLynQO9FrmYMOWuo1c1X']
-    id =  web_api('v1/me', 'get', None)
+
+    token = autorization()
+    id =  web_api(token, 'v1/me', 'GET')
 
     body = {
         "name": "My recommendation playlist",
@@ -40,10 +44,10 @@ def save_playlist():
         "public": False
     }
 
-    playlist = web_api(f"v1/users/{id['id']}/playlists", 'post', body)
+    playlist = web_api(token, f"v1/users/{id['id']}/playlists", 'POST', body)
 
     try:
-        web_api(f"v1/playlists/{playlist['id']}/tracks?uris={','.join(tracksURI)}", 'post', None)
+        web_api(token, f"v1/playlists/{playlist['id']}/tracks?uris={','.join(tracksURI)}", 'POST')
 
         print(f"{playlist['name']}, {playlist['id']}")
         print('Playlist com músicas recomendadas criada.')
@@ -51,7 +55,17 @@ def save_playlist():
         print('Erro ao criar a playlist.')
 
 def listen_songs():
-    id_disposivo = 0
+    token = autorization()
+    resp = web_api(token, "v1/me/player/devices", 'GET')
+    for a in enumerate(resp['devices']):
+        # print(a['type'])
+        if a['type'] == 'Computer':
+            id_dispositivo = resp['devices'][0]['id']
+        elif a['type'] == 'Smartphone':
+            id_dispositivo = resp['devices'][0]['id']
+        elif a['type'] == 'Iphone':
+            id_dispositivo = resp['devices'][0]['id']
+    # print(resp['devices'][0])
 
     body = {
         "context_uri":"spotify:track:7fcLynQO9FrmYMOWuo1c1X", # playlist, album ou artista
@@ -63,7 +77,10 @@ def listen_songs():
     }
 
     try:
-        web_api(f"v1/me/player/play", 'put', body)
+        if id_dispositivo == 0:
+            web_api(token, f"v1/me/player/play", 'put', body)
+        else:
+            web_api(token, f"v1/me/player/play/{id_dispositivo}", 'put', body)
     except:
-        print("Erro ao repoduzir.")    
-
+        print("Erro ao repoduzir.")
+listen_songs()

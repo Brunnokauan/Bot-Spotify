@@ -5,27 +5,29 @@ import os
 # import spotipy
 import requests
 
-username = 'bot-spotify'
-redirect_uri = 'http://localhost:8888/callback'
-scope = 'user-top-read playlist-modify-private user-modify-playback-state'
+def autorization():
+    username = 'bot-spotify'
+    redirect_uri = 'http://localhost:8888/callback'
+    scope = 'user-top-read playlist-modify-private user-modify-playback-state user-read-playback-state'
 
-load_dotenv()
+    load_dotenv()
 
-client_id = os.getenv("CLIENT_ID")
-client_secret = os.getenv("CLIENT_SECRET")
+    client_id = os.getenv("CLIENT_ID")
+    client_secret = os.getenv("CLIENT_SECRET")
 
-# token = spotipy.Spotify(auth_manager=SpotifyOAuth(username=username, client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri, scope=scope))
-token = util.prompt_for_user_token(username=username, client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri, scope=scope)
+    # token = spotipy.Spotify(auth_manager=SpotifyOAuth(username=username, client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri, scope=scope))
+    token = util.prompt_for_user_token(username=username, client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri, scope=scope)
+    return token
 
-def web_api(endpoint, method, body):
+def web_api(token, endpoint, method, body=None):
     # data = {"grant_type": "client_credentials"}
-    if (method == 'get'):
+    if (method == 'GET'):
         res = requests.get(url=f"https://api.spotify.com/{endpoint}", headers={"Authorization": f"Bearer {token}"})
-    elif (method == 'post'):
+    elif (method == 'POST'):
         res = requests.post(url=f"https://api.spotify.com/{endpoint}",
               headers={"Authorization": f'Bearer {token}', "Content-Type": "application/application/json"},
               json=body)
-    elif (method == 'put'):
+    elif (method == 'PUT'):
         res = requests.post(url=f"https://api.spotify.com/{endpoint}",
               headers={"Authorization": f'Bearer {token}', "Content-Type": "application/application/json"},
               json=body)
