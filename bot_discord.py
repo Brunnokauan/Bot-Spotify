@@ -1,8 +1,7 @@
 import discord
 from discord import app_commands
-from main import top_songs
+from main import top_songs, listen_songs, pause_songs, playback_shuflle
 import os
-# from time import sleep
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -20,10 +19,6 @@ class MyClient(discord.Client):
         print(f'Message from {message.author}: {message.content}')
         # if message.content == 'top5':
         #     await message.channel.send(top_five())
-        # elif message.content in saudacoes:
-        #     await message.channel.send('Olá, estranho!')
-        #     sleep(2)
-        #     await message.channel.send('É novo por aqui?')
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -32,9 +27,21 @@ client = MyClient(intents=intents)
 
 tree = app_commands.CommandTree(client)
 # Digita comando
-@tree.command(guild=discord.Object(id=id_servidor), name='top5', description='Top músicas mais ouvidas deste mês. Padrão: 5')
-async def top5(interaction: discord.Interaction, qtd:int=5):
+@tree.command(guild=discord.Object(id=id_servidor), name='top-songs', description='Top músicas mais ouvidas deste mês. Padrão: 5')
+async def topSongs(interaction: discord.Interaction, qtd:int=5):
     await interaction.response.send_message(top_songs(qtd), ephemeral=True)
+
+@tree.command(guild=discord.Object(id=id_servidor), name='play', description='Tocar uma playlist ou álbum.')
+async def playSongs(interaction: discord.Interaction, playlist:str=None, album:str=None):
+    await interaction.response.send_message(listen_songs(), ephemeral=True)
+
+@tree.command(guild=discord.Object(id=id_servidor), name='pause', description='Pausa a música.')
+async def playSongs(interaction: discord.Interaction):
+    await interaction.response.send_message(pause_songs(), ephemeral=True)
+
+@tree.command(guild=discord.Object(id=id_servidor), name='playback-shuffle', description='Toca de modo aleatório.')
+async def playSongs(interaction: discord.Interaction):
+    await interaction.response.send_message(playback_shuflle() ,ephemeral=True)
 
 # Seleciona comando. OBS: clique botão direito minha mensagem, em apps
 # @tree.context_menu(name="Teste", guild=discord.Object(id=id_servidor))

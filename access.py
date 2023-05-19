@@ -22,16 +22,22 @@ def autorization():
 def web_api(token, endpoint, method, body=None):
     # data = {"grant_type": "client_credentials"}
     if (method == 'GET'):
-        res = requests.get(url=f"https://api.spotify.com/{endpoint}", headers={"Authorization": f"Bearer {token}"})
+        res = requests.get(url=f"https://api.spotify.com/{endpoint}", headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"})
+        return res.json()
     elif (method == 'POST'):
         res = requests.post(url=f"https://api.spotify.com/{endpoint}",
-              headers={"Authorization": f'Bearer {token}', "Content-Type": "application/application/json"},
+              headers={"Authorization": f'Bearer {token}', "Content-Type": "application/json"},
               json=body)
+        return res.json()
     elif (method == 'PUT'):
-        res = requests.post(url=f"https://api.spotify.com/{endpoint}",
-              headers={"Authorization": f'Bearer {token}', "Content-Type": "application/application/json"},
+        if body != None:
+            res = requests.put(url=f"https://api.spotify.com/{endpoint}",
+              headers={"Authorization": f'Bearer {token}', "Content-Type": "application/json"},
               json=body)
-    return res.json()
+        else:
+            res = requests.put(url=f"https://api.spotify.com/{endpoint}",
+              headers={"Authorization": f'Bearer {token}'})
+        return res.status_code
 
 # result = web_api('v1/me','get')
 # print(result)

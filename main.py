@@ -1,11 +1,77 @@
 from access import web_api, autorization
 import os
 
+# def save_playlist():
+#     tracksURI = ['spotify:track:4Bb53fsDAero14LpAbsmft','spotify:track:6f0XqZKDhD5EOTziuKYyq1','spotify:track:2CgOd0Lj5MuvOqzqdaAXtS','spotify:track:6wLujYsftQ9tGIvf54lrkz','spotify:track:3gB0fkEzOzV0kEWuQBFweu','spotify:track:4tAMNBZRoR2WQ6UnZs3Uuh','spotify:track:42xnrDAQcU0208y6iGR5Ls','spotify:track:6GiQfK7gtNGlODn53HZvpw','spotify:track:5kvFBu6jDJMECOqmD7OwUx','spotify:track:7fcLynQO9FrmYMOWuo1c1X']
+
+#     token = autorization()
+#     id =  web_api(token, 'v1/me', 'GET')
+
+#     body = {
+#         "name": "My recommendation playlist",
+#         "description": "Playlist created by the tutorial on developer.spotify.com",
+#         "public": False
+#     }
+
+#     playlist = web_api(token, f"v1/users/{id['id']}/playlists", 'POST', body)
+
+#     try:
+#         web_api(token, f"v1/playlists/{playlist['id']}/tracks?uris={','.join(tracksURI)}", 'POST')
+
+#         print(f"{playlist['name']}, {playlist['id']}")
+#         print('Playlist com músicas recomendadas criada.')
+#     except:
+#         print('Erro ao criar a playlist.')
+
+def device_list():
+    id_dispositivo = None
+    # resp = web_api(token, "v1/me/player/devices", 'GET')
+    # for a in enumerate(resp['devices']):
+    #     # print(a['type'])
+    #     if a['type'] == 'Computer':
+    #         id_dispositivo = resp['devices'][0]['id']
+    #     elif a['type'] == 'Smartphone':
+    #         id_dispositivo = resp['devices'][0]['id']
+    #     elif a['type'] == 'Iphone':
+    #         id_dispositivo = resp['devices'][0]['id']
+    # # print(resp['devices'][0])
+
+def listen_songs(songs:list):
+    token = autorization()
+    id_dispositivo = None
+    # body_example = {
+    #     # "context_uri":"spotify:playlist:7fcLynQO9FrmYMOWuo1c1X", # playlist, album ou artista
+    #     "uris": songs, # Faixas para reproduzir
+    #     # "offset": {
+    #     #     "position": 5 # ou "uri": "spotify:track:7fcLynQO9FrmYMOWuo1c1X"
+    #     # },
+    #     "position_ms": 0 # tempo que inicia a música
+    # }
+
+    body = {
+        "uris": songs,
+        "position_ms": 0
+    }
+
+    # try:
+    if id_dispositivo == None:
+        # print(body)
+        web_api(token, f"v1/me/player/play", 'PUT', body)
+        # return 'Play músicas!'
+    else:
+        web_api(token, f"v1/me/player/play/{id_dispositivo}", 'put', body)
+# except:
+    #     print("Erro ao repoduzir.")
+    # return 'Começa a tocar música.'
+
 def top_songs(qtd_songs):
     token = autorization()
     top_tracks = web_api(token,f'v1/me/top/tracks?time_range=short_term&limit={qtd_songs}','GET')
     result = ''
+    songs = []
+    # try:
     for n, song in enumerate(top_tracks['items']):
+        formater_song = f"spotify:track:{song['id']}"
         music = f"{n+1}. {song['name']} - " 
         artist = ''
         for a, artists in enumerate(top_tracks['items'][n]['artists']):
@@ -15,10 +81,14 @@ def top_songs(qtd_songs):
                 text1 = f"{artists['name']}" 
             artist += text1
         result += music + artist
+        songs.append(formater_song)
         if n != qtd_songs-1:
             result += os.linesep
         # print(song['artists'][0]['name'])
+    listen_songs(songs)
     return f'**TOP {qtd_songs} MÚSICAS MAIS OUVIDAS DESTE MÊS:**{os.linesep}' + result
+    # except:
+    #     return 'Não há músicas.'
 
 def recomendation():
     topTracksIds = ['4Bb53fsDAero14LpAbsmft','2CgOd0Lj5MuvOqzqdaAXtS','3gB0fkEzOzV0kEWuQBFweu','42xnrDAQcU0208y6iGR5Ls','5kvFBu6jDJMECOqmD7OwUx']
@@ -32,55 +102,17 @@ def recomendation():
             print(f"{artists['name']}",end=', ')
         print('\n', end='')
 
-def save_playlist():
-    tracksURI = ['spotify:track:4Bb53fsDAero14LpAbsmft','spotify:track:6f0XqZKDhD5EOTziuKYyq1','spotify:track:2CgOd0Lj5MuvOqzqdaAXtS','spotify:track:6wLujYsftQ9tGIvf54lrkz','spotify:track:3gB0fkEzOzV0kEWuQBFweu','spotify:track:4tAMNBZRoR2WQ6UnZs3Uuh','spotify:track:42xnrDAQcU0208y6iGR5Ls','spotify:track:6GiQfK7gtNGlODn53HZvpw','spotify:track:5kvFBu6jDJMECOqmD7OwUx','spotify:track:7fcLynQO9FrmYMOWuo1c1X']
-
+def pause_songs():
     token = autorization()
-    id =  web_api(token, 'v1/me', 'GET')
-
-    body = {
-        "name": "My recommendation playlist",
-        "description": "Playlist created by the tutorial on developer.spotify.com",
-        "public": False
-    }
-
-    playlist = web_api(token, f"v1/users/{id['id']}/playlists", 'POST', body)
-
     try:
-        web_api(token, f"v1/playlists/{playlist['id']}/tracks?uris={','.join(tracksURI)}", 'POST')
-
-        print(f"{playlist['name']}, {playlist['id']}")
-        print('Playlist com músicas recomendadas criada.')
+        res = web_api(token, f"v1/me/player/pause", 'PUT')
+        if res == 204:
+            return 'Música pausada'
     except:
-        print('Erro ao criar a playlist.')
+        print(ValueError)
 
-def listen_songs():
+def playback_shuflle():
     token = autorization()
-    resp = web_api(token, "v1/me/player/devices", 'GET')
-    for a in enumerate(resp['devices']):
-        # print(a['type'])
-        if a['type'] == 'Computer':
-            id_dispositivo = resp['devices'][0]['id']
-        elif a['type'] == 'Smartphone':
-            id_dispositivo = resp['devices'][0]['id']
-        elif a['type'] == 'Iphone':
-            id_dispositivo = resp['devices'][0]['id']
-    # print(resp['devices'][0])
-
-    body = {
-        "context_uri":"spotify:track:7fcLynQO9FrmYMOWuo1c1X", # playlist, album ou artista
-        # "uris": ["spotify:track:7fcLynQO9FrmYMOWuo1c1X", "spotify:track:7fcLynQO9FrmYMOWuo1c1X"], Faixas para reproduzir
-        # "offset": {
-        #     "position": 5 # ou "uri": "spotify:track:7fcLynQO9FrmYMOWuo1c1X"
-        # },
-        "position_ms": 0 # tempo que inicia a música
-    }
-
-    try:
-        if id_dispositivo == 0:
-            web_api(token, f"v1/me/player/play", 'put', body)
-        else:
-            web_api(token, f"v1/me/player/play/{id_dispositivo}", 'put', body)
-    except:
-        print("Erro ao repoduzir.")
-listen_songs()
+    res = web_api(token, f"v1/me/player/shuffle?state=true", 'PUT')
+    if res == 204:
+        return 'Músicas em modo aleatório ativado.'
