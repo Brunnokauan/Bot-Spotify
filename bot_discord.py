@@ -1,6 +1,7 @@
 import discord
 from discord import app_commands
 from main import top_songs, listen_songs, pause_songs, playback_shuflle
+from access import autorization
 import os
 from dotenv import load_dotenv
 
@@ -29,7 +30,9 @@ tree = app_commands.CommandTree(client)
 # Digita comando
 @tree.command(guild=discord.Object(id=id_servidor), name='top-songs', description='Top músicas mais ouvidas deste mês. Padrão: 5')
 async def topSongs(interaction: discord.Interaction, qtd:int=5):
-    await interaction.response.send_message(top_songs(qtd), ephemeral=True)
+    user = interaction.user.display_name
+    print(f'Message from {user}: /top-songs')  
+    await interaction.response.send_message(top_songs(qtd, user), ephemeral=True)
 
 @tree.command(guild=discord.Object(id=id_servidor), name='play', description='Tocar uma playlist ou álbum.')
 async def playSongs(interaction: discord.Interaction, playlist:str=None, album:str=None):

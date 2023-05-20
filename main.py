@@ -23,22 +23,23 @@ import os
 #     except:
 #         print('Erro ao criar a playlist.')
 
-def device_list():
-    id_dispositivo = None
-    # resp = web_api(token, "v1/me/player/devices", 'GET')
-    # for a in enumerate(resp['devices']):
-    #     # print(a['type'])
-    #     if a['type'] == 'Computer':
-    #         id_dispositivo = resp['devices'][0]['id']
-    #     elif a['type'] == 'Smartphone':
-    #         id_dispositivo = resp['devices'][0]['id']
-    #     elif a['type'] == 'Iphone':
-    #         id_dispositivo = resp['devices'][0]['id']
-    # # print(resp['devices'][0])
+# def device_list():
+#     token = autorization('bru09')
+#     id_dispositivo = None
+#     res = web_api(token, "v1/me/player/devices", 'GET')
+#     for a in enumerate(res['devices']):
+#         print(a)
+#         # if a['type'] == 'Computer':
+#         #     id_dispositivo = resp['devices'][0]['id']
+#         # elif a['type'] == 'Smartphone':
+#         #     id_dispositivo = resp['devices'][0]['id']
+#         # elif a['type'] == 'Iphone':
+#         #     id_dispositivo = resp['devices'][0]['id']
+#     # print(resp['devices'][0])
+# device_list()
 
-def listen_songs(songs:list):
-    token = autorization()
-    id_dispositivo = None
+def listen_songs(songs:list, discord_user):
+    token = autorization(discord_user)
     # body_example = {
     #     # "context_uri":"spotify:playlist:7fcLynQO9FrmYMOWuo1c1X", # playlist, album ou artista
     #     "uris": songs, # Faixas para reproduzir
@@ -54,19 +55,16 @@ def listen_songs(songs:list):
     }
 
     # try:
-    if id_dispositivo == None:
         # print(body)
-        web_api(token, f"v1/me/player/play", 'PUT', body)
+    web_api(token, f"v1/me/player/play", 'PUT', body)
         # return 'Play músicas!'
-    else:
-        web_api(token, f"v1/me/player/play/{id_dispositivo}", 'put', body)
-# except:
+    # except:
     #     print("Erro ao repoduzir.")
     # return 'Começa a tocar música.'
 
-def top_songs(qtd_songs):
-    token = autorization()
-    top_tracks = web_api(token,f'v1/me/top/tracks?time_range=short_term&limit={qtd_songs}','GET')
+def top_songs(qtd_songs, discord_user):
+    token = autorization(discord_user)
+    top_tracks = web_api(token, f'v1/me/top/tracks?time_range=short_term&limit={qtd_songs}', 'GET')
     result = ''
     songs = []
     # try:
@@ -85,7 +83,7 @@ def top_songs(qtd_songs):
         if n != qtd_songs-1:
             result += os.linesep
         # print(song['artists'][0]['name'])
-    listen_songs(songs)
+    listen_songs(songs, discord_user)
     return f'**TOP {qtd_songs} MÚSICAS MAIS OUVIDAS DESTE MÊS:**{os.linesep}' + result
     # except:
     #     return 'Não há músicas.'
@@ -116,3 +114,9 @@ def playback_shuflle():
     res = web_api(token, f"v1/me/player/shuffle?state=true", 'PUT')
     if res == 204:
         return 'Músicas em modo aleatório ativado.'
+    
+# def get_status_playback():
+#     token = autorization('bru09')
+#     res = web_api(token, f"v1/me/player/currently-playing", 'GET')
+#     print(res)
+# get_status_playback()
