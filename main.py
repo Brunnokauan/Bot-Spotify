@@ -88,17 +88,38 @@ def top_songs(qtd_songs, discord_user):
     # except:
     #     return 'Não há músicas.'
 
-def recomendation():
-    topTracksIds = ['4Bb53fsDAero14LpAbsmft','2CgOd0Lj5MuvOqzqdaAXtS','3gB0fkEzOzV0kEWuQBFweu','42xnrDAQcU0208y6iGR5Ls','5kvFBu6jDJMECOqmD7OwUx']
+def recomendation(qtd_songs, discord_user):
+    token = autorization(discord_user)
+    top_songs = web_api(token, f'v1/me/top/tracks?time_range=short_term&limit={qtd_songs}', 'GET')
+    songs = []
+    for song in top_songs['items']:
+        song_id = f"{song['id']}"
+        songs.append(song_id)
 
-    token = autorization()
-    new_songs = web_api(token, f"v1/recommendations?limit=5&seed_tracks={','.join(topTracksIds)}", 'GET')
+    new_songs = web_api(token, f"v1/recommendations?limit={qtd_songs}&seed_tracks={','.join(songs)}", 'GET')
 
+    # for n, song in enumerate(new_songs['tracks']):
+    #     print(f"{n+1}. {song['name']} by ", end='')
+    #     for artists in new_songs['tracks'][n]['artists']:
+    #         print(f"{artists['name']}",end=', ')
+    #     print('\n', end='')
+    
+    result = ''
     for n, song in enumerate(new_songs['tracks']):
-        print(f"{n+1}. {song['name']} by ", end='')
-        for artists in new_songs['tracks'][n]['artists']:
-            print(f"{artists['name']}",end=', ')
-        print('\n', end='')
+        music = f"{n+1}. {song['name']} - " 
+        artist = ''
+        for a, artists in enumerate(new_songs['tracks'][n]['artists']):
+            if a+1 != len(new_songs['tracks'][n]['artists']):
+                text1 = f"{artists['name']}, " 
+            else:
+                text1 = f"{artists['name']}" 
+            artist += text1
+        result += music + artist
+        if n != qtd_songs-1:
+            result += os.linesep
+        # print(song['artists'][0]['name'])
+    
+    return f'**{qtd_songs} MÚSICAS RECOMENDADAS PARA VOÇÊ:**{os.linesep}' + result
 
 def pause_songs():
     token = autorization()

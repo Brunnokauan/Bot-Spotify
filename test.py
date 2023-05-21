@@ -7,7 +7,8 @@ load_dotenv()
 
 client_id = os.getenv("CLIENT_ID")
 client_secret = os.getenv("CLIENT_SECRET")
-redirect_uri = 'http://localhost:8888/callback'
+port = os.getenv("PORT")
+redirect_uri = f'http://{port}/callback'
 scope = 'user-top-read'
 sp = spotipy.Spotify(oauth_manager=SpotifyOAuth(scope=scope, client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri))
 # sp = spotipy.Spotify(oauth_manager=SpotifyOAuth(scope=scope, client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri, cache_handler=spotipy.CacheFileHandler(username='bru09' )))
