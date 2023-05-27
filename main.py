@@ -1,4 +1,4 @@
-from access import web_api, autorization
+from access import web_api, autorization, refresh_token
 import os
 
 # def save_playlist():
@@ -54,42 +54,57 @@ def listen_songs(songs:list, discord_user):
         "position_ms": 0
     }
 
-    # try:
+    try:
         # print(body)
-    web_api(token, f"v1/me/player/play", 'PUT', body)
-        # return 'Play músicas!'
-    # except:
-    #     print("Erro ao repoduzir.")
+        res = web_api(token, f"v1/me/player/play", 'PUT', body)
+        if res == 204:
+            return 'Play music!'
+        else:
+            token = refresh_token(discord_user)
+            res = web_api(token, f"v1/me/player/play", 'PUT', body)
+            if res == 204:
+                return 'Play music!'
+    except:
+        return "Erro ao repoduzir."
     # return 'Começa a tocar música.'
 
 def top_songs(qtd_songs, discord_user):
     token = autorization(discord_user)
-    top_tracks = web_api(token, f'v1/me/top/tracks?time_range=short_term&limit={qtd_songs}', 'GET')
+    try:
+        top_tracks = web_api(token, f'v1/me/top/tracks?time_range=short_term&limit={qtd_songs}', 'GET')
+    except ValueError or TypeError:
+        token = refresh_token(discord_user)
+        top_tracks = web_api(token, f'v1/me/top/tracks?time_range=short_term&limit={qtd_songs}', 'GET')
+    except:
+        return 'Erro ao executar o comando.'
     result = ''
     songs = []
-    # try:
-    for n, song in enumerate(top_tracks['items']):
-        formater_song = f"spotify:track:{song['id']}"
-        music = f"{n+1}. {song['name']} - " 
-        artist = ''
-        for a, artists in enumerate(top_tracks['items'][n]['artists']):
-            if a+1 != len(top_tracks['items'][n]['artists']):
-                text1 = f"{artists['name']}, " 
-            else:
-                text1 = f"{artists['name']}" 
-            artist += text1
-        result += music + artist
-        songs.append(formater_song)
-        if n != qtd_songs-1:
-            result += os.linesep
-        # print(song['artists'][0]['name'])
-    listen_songs(songs, discord_user)
-    return f'**TOP {qtd_songs} MÚSICAS MAIS OUVIDAS DESTE MÊS:**{os.linesep}' + result
-    # except:
-    #     return 'Não há músicas.'
+    try:
+        for n, song in enumerate(top_tracks['items']):
+            formater_song = f"spotify:track:{song['id']}"
+            music = f"{n+1}. {song['name']} - " 
+            artist = ''
+            for a, artists in enumerate(top_tracks['items'][n]['artists']):
+                if a+1 != len(top_tracks['items'][n]['artists']):
+                    text1 = f"{artists['name']}, " 
+                else:
+                    text1 = f"{artists['name']}" 
+                artist += text1
+            result += music + artist
+            songs.append(formater_song)
+            if n != qtd_songs-1:
+                result += os.linesep
+            # print(song['artists'][0]['name'])
+        listen_songs(songs, discord_user)
+        return f'**TOP {qtd_songs} MÚSICAS MAIS OUVIDAS DESTE MÊS:**{os.linesep}' + result
+    except:
+        return 'Não há músicas.'
+# print(top_songs(5, 'bru09'))
 
 def recomendation(qtd_songs, discord_user):
     token = autorization(discord_user)
+    if token == None:
+        return 'Você não tem cadastro!'
     top_songs = web_api(token, f'v1/me/top/tracks?time_range=short_term&limit={qtd_songs}', 'GET')
     songs = []
     for song in top_songs['items']:
@@ -121,21 +136,52 @@ def recomendation(qtd_songs, discord_user):
     
     return f'**{qtd_songs} MÚSICAS RECOMENDADAS PARA VOÇÊ:**{os.linesep}' + result
 
-def pause_songs():
-    token = autorization()
+def pause_songs(discord_user):
+    token = autorization(discord_user)
     try:
         res = web_api(token, f"v1/me/player/pause", 'PUT')
         if res == 204:
             return 'Música pausada'
+        else:
+            token = refresh_token(discord_user)
+            res = web_api(token, f"v1/me/player/pause", 'PUT')
+            if res == 204:
+                return 'Música pausada'
     except:
-        print(ValueError)
+        return 'Erro ao pausar a música'
 
-def playback_shuflle():
-    token = autorization()
-    res = web_api(token, f"v1/me/player/shuffle?state=true", 'PUT')
-    if res == 204:
-        return 'Músicas em modo aleatório ativado.'
+def playback_shuflle(discord_user):
+    token = autorization(discord_user)
+    try:
+        res = web_api(token, f"v1/me/player/shuffle?state=true", 'PUT')
+        if res == 204:
+            return 'Músicas em modo aleatório ativado.'
+        else:
+            token = refresh_token(discord_user)
+            res = web_api(token, f"v1/me/player/shuffle?state=true", 'PUT')
+            if res == 204:
+                return 'Músicas em modo aleatório ativado.'
+    except:
+        return 'Erro ao ativar lista de reprodução aleatória.'
+
+
+# def teste(user:str):
+#     cnx = mysql.connector.connect(user='root', password='', host='127.0.0.1', database='bot')
+#     cursor = cnx.cursor()
+
+#     query = f'SELECT access_token FROM user_discord WHERE display_name=\"{user}\"'
+
+#     cursor.execute(query)
+
+#     for token in cursor:
+#         access_token = token[0]
     
+#     cursor.close()
+#     cnx.close()
+#     print(access_token)
+
+# teste('bru09')
+
 # def get_status_playback():
 #     token = autorization('bru09')
 #     res = web_api(token, f"v1/me/player/currently-playing", 'GET')
