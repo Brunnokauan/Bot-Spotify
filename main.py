@@ -1,204 +1,65 @@
-from access import web_api, autorization, refresh_token
+import discord
+from discord import app_commands
+from commands import top_songs, pause_songs, playback_shuflle, recomendation
+from access import register_user
 import os
+from dotenv import load_dotenv
 
-# def save_playlist():
-#     tracksURI = ['spotify:track:4Bb53fsDAero14LpAbsmft','spotify:track:6f0XqZKDhD5EOTziuKYyq1','spotify:track:2CgOd0Lj5MuvOqzqdaAXtS','spotify:track:6wLujYsftQ9tGIvf54lrkz','spotify:track:3gB0fkEzOzV0kEWuQBFweu','spotify:track:4tAMNBZRoR2WQ6UnZs3Uuh','spotify:track:42xnrDAQcU0208y6iGR5Ls','spotify:track:6GiQfK7gtNGlODn53HZvpw','spotify:track:5kvFBu6jDJMECOqmD7OwUx','spotify:track:7fcLynQO9FrmYMOWuo1c1X']
+load_dotenv()
 
-#     token = autorization()
-#     id =  web_api(token, 'v1/me', 'GET')
+token_bot = os.getenv("TOKEN_BOT")
+id_servidor = os.getenv("SERVIDOR_ID")
 
-#     body = {
-#         "name": "My recommendation playlist",
-#         "description": "Playlist created by the tutorial on developer.spotify.com",
-#         "public": False
-#     }
-
-#     playlist = web_api(token, f"v1/users/{id['id']}/playlists", 'POST', body)
-
-#     try:
-#         web_api(token, f"v1/playlists/{playlist['id']}/tracks?uris={','.join(tracksURI)}", 'POST')
-
-#         print(f"{playlist['name']}, {playlist['id']}")
-#         print('Playlist com músicas recomendadas criada.')
-#     except:
-#         print('Erro ao criar a playlist.')
-
-# def device_list():
-#     token = autorization('bru09')
-#     id_dispositivo = None
-#     res = web_api(token, "v1/me/player/devices", 'GET')
-#     for a in enumerate(res['devices']):
-#         print(a)
-#         # if a['type'] == 'Computer':
-#         #     id_dispositivo = resp['devices'][0]['id']
-#         # elif a['type'] == 'Smartphone':
-#         #     id_dispositivo = resp['devices'][0]['id']
-#         # elif a['type'] == 'Iphone':
-#         #     id_dispositivo = resp['devices'][0]['id']
-#     # print(resp['devices'][0])
-# device_list()
-
-def listen_songs(songs:list, discord_user):
-    token = autorization(discord_user)
-    # body_example = {
-    #     # "context_uri":"spotify:playlist:7fcLynQO9FrmYMOWuo1c1X", # playlist, album ou artista
-    #     "uris": songs, # Faixas para reproduzir
-    #     # "offset": {
-    #     #     "position": 5 # ou "uri": "spotify:track:7fcLynQO9FrmYMOWuo1c1X"
-    #     # },
-    #     "position_ms": 0 # tempo que inicia a música
-    # }
-
-    body = {
-        "uris": songs,
-        "position_ms": 0
-    }
-
-    try:
-        # print(body)
-        res = web_api(token, f"v1/me/player/play", 'PUT', body)
-        if res == 204:
-            return 'Play music!'
-        else:
-            token = refresh_token(discord_user)
-            res = web_api(token, f"v1/me/player/play", 'PUT', body)
-            if res == 204:
-                return 'Play music!'
-    except:
-        return "Erro ao repoduzir."
-    # return 'Começa a tocar música.'
-
-def top_songs(qtd_songs, discord_user:str):
-    token = autorization(discord_user)
-    # print(token
-    result = ''
-    songs = []
-    try:
-        top_tracks = web_api(token, f'v1/me/top/tracks?time_range=short_term&limit={qtd_songs}', 'GET')
-        for n, song in enumerate(top_tracks['items']):
-            formater_song = f"spotify:track:{song['id']}"
-            music = f"{n+1}. {song['name']} - " 
-            artist = ''
-            for a, artists in enumerate(top_tracks['items'][n]['artists']):
-                if a+1 != len(top_tracks['items'][n]['artists']):
-                    text1 = f"{artists['name']}, " 
-                else:
-                    text1 = f"{artists['name']}" 
-                artist += text1
-            result += music + artist
-            songs.append(formater_song)
-            if n != qtd_songs-1:
-                result += os.linesep
-            # print(song['artists'][0]['name'])
-        listen_songs(songs, discord_user)
-        return f'**TOP {qtd_songs} MÚSICAS MAIS OUVIDAS DESTE MÊS:**{os.linesep}' + result
-    except KeyError:
-        token = refresh_token(discord_user)
-        top_tracks = web_api(token, f'v1/me/top/tracks?time_range=short_term&limit={qtd_songs}', 'GET')
-        for n, song in enumerate(top_tracks['items']):
-            formater_song = f"spotify:track:{song['id']}"
-            music = f"{n+1}. {song['name']} - " 
-            artist = ''
-            for a, artists in enumerate(top_tracks['items'][n]['artists']):
-                if a+1 != len(top_tracks['items'][n]['artists']):
-                    text1 = f"{artists['name']}, " 
-                else:
-                    text1 = f"{artists['name']}" 
-                artist += text1
-            result += music + artist
-            songs.append(formater_song)
-            if n != qtd_songs-1:
-                result += os.linesep
-            # print(song['artists'][0]['name'])
-        listen_songs(songs, discord_user)
-        return f'**TOP {qtd_songs} MÚSICAS MAIS OUVIDAS DESTE MÊS:**{os.linesep}' + result
-    except:
-        return 'Não há músicas.'
-# print(top_songs(5, 'Lukitas25'))
-
-def recomendation(qtd_songs, discord_user):
-    token = autorization(discord_user)
-    if token == None:
-        return 'Você não tem cadastro!'
-    top_songs = web_api(token, f'v1/me/top/tracks?time_range=short_term&limit={qtd_songs}', 'GET')
-    songs = []
-    for song in top_songs['items']:
-        song_id = f"{song['id']}"
-        songs.append(song_id)
-
-    new_songs = web_api(token, f"v1/recommendations?limit={qtd_songs}&seed_tracks={','.join(songs)}", 'GET')
-
-    # for n, song in enumerate(new_songs['tracks']):
-    #     print(f"{n+1}. {song['name']} by ", end='')
-    #     for artists in new_songs['tracks'][n]['artists']:
-    #         print(f"{artists['name']}",end=', ')
-    #     print('\n', end='')
-    
-    result = ''
-    for n, song in enumerate(new_songs['tracks']):
-        music = f"{n+1}. {song['name']} - " 
-        artist = ''
-        for a, artists in enumerate(new_songs['tracks'][n]['artists']):
-            if a+1 != len(new_songs['tracks'][n]['artists']):
-                text1 = f"{artists['name']}, " 
-            else:
-                text1 = f"{artists['name']}" 
-            artist += text1
-        result += music + artist
-        if n != qtd_songs-1:
-            result += os.linesep
-        # print(song['artists'][0]['name'])
-    
-    return f'**{qtd_songs} MÚSICAS RECOMENDADAS PARA VOÇÊ:**{os.linesep}' + result
-
-def pause_songs(discord_user):
-    token = autorization(discord_user)
-    try:
-        res = web_api(token, f"v1/me/player/pause", 'PUT')
-        if res == 204:
-            return 'Música pausada'
-        else:
-            token = refresh_token(discord_user)
-            res = web_api(token, f"v1/me/player/pause", 'PUT')
-            if res == 204:
-                return 'Música pausada'
-    except:
-        return 'Erro ao pausar a música'
-
-def playback_shuflle(discord_user):
-    token = autorization(discord_user)
-    try:
-        res = web_api(token, f"v1/me/player/shuffle?state=true", 'PUT')
-        if res == 204:
-            return 'Músicas em modo aleatório ativado.'
-        else:
-            token = refresh_token(discord_user)
-            res = web_api(token, f"v1/me/player/shuffle?state=true", 'PUT')
-            if res == 204:
-                return 'Músicas em modo aleatório ativado.'
-    except:
-        return 'Erro ao ativar lista de reprodução aleatória.'
+class MyClient(discord.Client):
+    async def on_ready(self):
+        await tree.sync(guild=discord.Object(id=id_servidor))
+        print(f"Logged on as {self.user}")
 
 
-# def teste(user:str):
-#     cnx = mysql.connector.connect(user='root', password='', host='127.0.0.1', database='bot')
-#     cursor = cnx.cursor()
+    async def on_message(self, message):
+        print(f"Message from {message.author}: {message.content}")
+        # if message.content == 'top5':
+        #     await message.channel.send(top_five())
 
-#     query = f'SELECT access_token FROM user_discord WHERE display_name=\"{user}\"'
+intents = discord.Intents.default()
+intents.message_content = True
 
-#     cursor.execute(query)
+client = MyClient(intents=intents)
 
-#     for token in cursor:
-#         access_token = token[0]
-    
-#     cursor.close()
-#     cnx.close()
-#     print(access_token)
+tree = app_commands.CommandTree(client)
+# Digita comando
+@tree.command(guild=discord.Object(id=id_servidor), name="register", description="Registra seu usuário.")
+async def register(interaction: discord.Interaction, access_token:str, refresh_token:str):
+    user = interaction.user.display_name
+    print(f"Message from {user}: /register")  
+    await interaction.response.send_message(register_user(user, access_token, refresh_token), ephemeral=True)
 
-# teste('bru09')
+@tree.command(guild=discord.Object(id=id_servidor), name="top-songs", description="Top músicas mais ouvidas deste mês. Padrão: 5")
+async def topSongs(interaction: discord.Interaction, qtd:int=5):
+    user = interaction.user.display_name
+    print(f"Message from {user}: /top-songs")  
+    await interaction.response.send_message(top_songs(qtd, user), ephemeral=True)
 
-# def get_status_playback():
-#     token = autorization('bru09')
-#     res = web_api(token, f"v1/me/player/currently-playing", 'GET')
-#     print(res)
-# get_status_playback()
+# @tree.command(guild=discord.Object(id=id_servidor), name='play', description='Tocar uma playlist ou álbum.')
+# async def playSongs(interaction: discord.Interaction, playlist:str=None, album:str=None):
+#     await interaction.response.send_message(listen_songs(), ephemeral=True)
+
+@tree.command(guild=discord.Object(id=id_servidor), name="pause", description="Pausa a música.")
+async def pauseSong(interaction: discord.Interaction):
+    user = interaction.user.display_name
+    print(f"Message from {user}: /pause") 
+    await interaction.response.send_message(pause_songs(user), ephemeral=True)
+
+@tree.command(guild=discord.Object(id=id_servidor), name="playback-shuffle", description="Toca de modo aleatório.")
+async def playbackShuffle(interaction: discord.Interaction):
+    user = interaction.user.display_name
+    print(f"Message from {user}: /playback-shuffle")  
+    await interaction.response.send_message(playback_shuflle(user) ,ephemeral=True)
+
+@tree.command(guild=discord.Object(id=id_servidor), name="recomendation-songs", description="Recomendações de músicas baseadas nos seus topSongs.")
+async def playbackShuffle(interaction: discord.Interaction, qtd:int=5):
+    user = interaction.user.display_name
+    print(f"Message from {user}: /recomendation-songs")  
+    await interaction.response.send_message(recomendation(qtd, user) ,ephemeral=True)
+
+client.run(token_bot)

@@ -1,27 +1,8 @@
-# import spotipy.util as util
-# from spotipy.oauth2 import SpotifyOAuth
 from dotenv import load_dotenv
 import os
-# import spotipy
 import requests
 import mysql.connector
 import base64
-# import json
-
-# def autorization(discord_user:str):
-#     username = 'bot-spotify'
-#     redirect_uri = 'http://localhost:8888/callback'
-#     scope = 'user-top-read playlist-modify-private user-modify-playback-state user-read-playback-state'
-
-#     load_dotenv()
-
-#     client_id = os.getenv("CLIENT_ID")
-#     client_secret = os.getenv("CLIENT_SECRET")
-#     cache_path = f'cache/cache-{discord_user}'
-
-#     # token = spotipy.Spotify(auth_manager=SpotifyOAuth(username=username, client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri, scope=scope))
-#     token = util.prompt_for_user_token(username=username, client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri, scope=scope, cache_path=cache_path)
-#     return token
 
 load_dotenv()
 
@@ -33,15 +14,15 @@ database = os.getenv("DATABASE")
 def register_user(user_discord:str, token:str, refresh_token:str):
     try:
         cnx = mysql.connector.connect(user=user, password=password, host=host, database=database)
-        sql = f'INSERT INTO user_discord (display_name, access_token, refresh_token, created_at, updated_at) VALUES (\"{user_discord}\", \"{token}\", \"{refresh_token}\", NOW(), NOW())'
+        sql = f"INSERT INTO user_discord (display_name, access_token, refresh_token, created_at, updated_at) VALUES (\"{user_discord}\", \"{token}\", \"{refresh_token}\", NOW(), NOW())"
         cursor = cnx.cursor()
         cursor.execute(sql)
         cnx.commit()
         cursor.close()
         cnx.close()
-        return f'Usuário {user_discord} registrado com sucesso!'
+        return f"Usuário {user_discord} registrado com sucesso!"
     except:
-        return 'Erro ao registrar usuário.'
+        return "Erro ao registrar usuário."
 
 def refresh_token(user_discord):
     load_dotenv()
@@ -49,8 +30,8 @@ def refresh_token(user_discord):
     client_secret = os.getenv("CLIENT_SECRET")
     cnx = mysql.connector.connect(user=user, password=password, host=host, database=database)
     cursor = cnx.cursor()
-    query1 = f'SELECT refresh_token FROM user_discord WHERE display_name=\"{user_discord}\"'
-    cursor.execute(query1)
+    query = f"SELECT refresh_token FROM user_discord WHERE display_name=\"{user_discord}\""
+    cursor.execute(query)
 
     for token in cursor:
         refresh_token = token[0]
@@ -60,11 +41,11 @@ def refresh_token(user_discord):
     auth_base64 = str(base64.b64encode(auth_bytes), "utf-8")
     headers = {"Authorization": f"Basic {auth_base64}", "Content-Type": "application/x-www-form-urlencoded"}
     body = {
-        "grant_type": 'refresh_token',
+        "grant_type": "refresh_token",
         "refresh_token": refresh_token
     }
 
-    res = requests.post(url='https://accounts.spotify.com/api/token', headers=headers, data=body)
+    res = requests.post(url="https://accounts.spotify.com/api/token", headers=headers, data=body)
     # json_result = json.loads(res.content)
     # token = json_result
 
@@ -76,11 +57,11 @@ def refresh_token(user_discord):
     cnx.close()
     return res.json()['access_token']
 
-def autorization(user_discord):
-    cnx = mysql.connector.connect(user='root', password='', host='127.0.0.1', database='bot')
+def authorization(user_discord):
+    cnx = mysql.connector.connect(user="root", password="", host="127.0.0.1", database="bot")
     cursor = cnx.cursor()
 
-    query = f'SELECT access_token FROM user_discord WHERE display_name=\"{user_discord}\"'
+    query = f"SELECT access_token FROM user_discord WHERE display_name=\"{user_discord}\""
 
     cursor.execute(query)
 
@@ -96,23 +77,22 @@ def autorization(user_discord):
 # print(autorization('Lukitas25'))
 
 def web_api(token, endpoint, method, body=None):
-    # data = {"grant_type": "client_credentials"}
-    if (method == 'GET'):
+    if (method == "GET"):
         res = requests.get(url=f"https://api.spotify.com/{endpoint}", headers={"Authorization": f"Bearer {token}"})
         return res.json()
-    elif (method == 'POST'):
+    elif (method == "POST"):
         res = requests.post(url=f"https://api.spotify.com/{endpoint}",
-              headers={"Authorization": f'Bearer {token}', "Content-Type": "application/json"},
+              headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
               json=body)
         return res.json()
-    elif (method == 'PUT'):
+    elif (method == "PUT"):
         if body != None:
             res = requests.put(url=f"https://api.spotify.com/{endpoint}",
-              headers={"Authorization": f'Bearer {token}', "Content-Type": "application/json"},
+              headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
               json=body)
         else:
             res = requests.put(url=f"https://api.spotify.com/{endpoint}",
-              headers={"Authorization": f'Bearer {token}'})
+              headers={"Authorization": f"Bearer {token}"})
         return res.status_code
 
 # result = web_api('v1/me','get')
