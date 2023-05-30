@@ -58,7 +58,7 @@ def refresh_token(user_discord):
     return res.json()['access_token']
 
 def authorization(user_discord):
-    cnx = mysql.connector.connect(user="root", password="", host="127.0.0.1", database="bot")
+    cnx = mysql.connector.connect(user=user, password=password, host=host, database=database)
     cursor = cnx.cursor()
 
     query = f"SELECT access_token FROM user_discord WHERE display_name=\"{user_discord}\""

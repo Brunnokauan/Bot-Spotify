@@ -68,10 +68,7 @@ def top_songs(qtd_songs, discord_user:str):
         return "Não há músicas."
 # print(top_songs(5, 'Lukitas25'))
 
-def recomendation(qtd_songs, discord_user):
-    token = authorization(discord_user)
-    if token == None:
-        return "Você não tem cadastro!"
+def recomendation(token, qtd_songs, discord_user):
     top_songs = web_api(token, f"v1/me/top/tracks?time_range=short_term&limit={qtd_songs}", "GET")
     songs = []
     for song in top_songs['items']:
