@@ -33,7 +33,7 @@ database = os.getenv("DATABASE")
 def register_user(user_discord:str, token:str, refresh_token:str):
     try:
         cnx = mysql.connector.connect(user=user, password=password, host=host, database=database)
-        sql = f'INSERT INTO user_discord (display_name, access_token, refresh_token, created_at, updated_at) VALUES (\"{user}\", \"{token}\", \"{refresh_token}\", NOW(), NOW())'
+        sql = f'INSERT INTO user_discord (display_name, access_token, refresh_token, created_at, updated_at) VALUES (\"{user_discord}\", \"{token}\", \"{refresh_token}\", NOW(), NOW())'
         cursor = cnx.cursor()
         cursor.execute(sql)
         cnx.commit()
@@ -43,14 +43,14 @@ def register_user(user_discord:str, token:str, refresh_token:str):
     except:
         return 'Erro ao registrar usuário.'
 
-def refresh_token(user:str):
+def refresh_token(user_discord):
     load_dotenv()
     client_id = os.getenv("CLIENT_ID")
     client_secret = os.getenv("CLIENT_SECRET")
     cnx = mysql.connector.connect(user=user, password=password, host=host, database=database)
     cursor = cnx.cursor()
-    query = f'SELECT refresh_token FROM user_discord WHERE display_name=\"{user}\"'
-    cursor.execute(query)
+    query1 = f'SELECT refresh_token FROM user_discord WHERE display_name=\"{user_discord}\"'
+    cursor.execute(query1)
 
     for token in cursor:
         refresh_token = token[0]
@@ -68,7 +68,7 @@ def refresh_token(user:str):
     # json_result = json.loads(res.content)
     # token = json_result
 
-    query2 = f"UPDATE user_discord SET access_token=\"{res.json()['access_token']}\", updated_at=NOW() WHERE display_name=\"{user}\""
+    query2 = f"UPDATE user_discord SET access_token=\"{res.json()['access_token']}\", updated_at=NOW() WHERE display_name=\"{user_discord}\""
     cursor.execute(query2)
     
     cnx.commit()
@@ -76,11 +76,11 @@ def refresh_token(user:str):
     cnx.close()
     return res.json()['access_token']
 
-def autorization(user:str):
+def autorization(user_discord):
     cnx = mysql.connector.connect(user='root', password='', host='127.0.0.1', database='bot')
     cursor = cnx.cursor()
 
-    query = f'SELECT access_token FROM user_discord WHERE display_name=\"{user}\"'
+    query = f'SELECT access_token FROM user_discord WHERE display_name=\"{user_discord}\"'
 
     cursor.execute(query)
 
@@ -93,7 +93,7 @@ def autorization(user:str):
         return access_token
     except:
         return None
-# autorization('teste')
+# print(autorization('Lukitas25'))
 
 def web_api(token, endpoint, method, body=None):
     # data = {"grant_type": "client_credentials"}

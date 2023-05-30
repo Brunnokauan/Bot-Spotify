@@ -68,18 +68,33 @@ def listen_songs(songs:list, discord_user):
         return "Erro ao repoduzir."
     # return 'Começa a tocar música.'
 
-def top_songs(qtd_songs, discord_user):
+def top_songs(qtd_songs, discord_user:str):
     token = autorization(discord_user)
-    try:
-        top_tracks = web_api(token, f'v1/me/top/tracks?time_range=short_term&limit={qtd_songs}', 'GET')
-    except ValueError or TypeError:
-        token = refresh_token(discord_user)
-        top_tracks = web_api(token, f'v1/me/top/tracks?time_range=short_term&limit={qtd_songs}', 'GET')
-    except:
-        return 'Erro ao executar o comando.'
+    # print(token
     result = ''
     songs = []
     try:
+        top_tracks = web_api(token, f'v1/me/top/tracks?time_range=short_term&limit={qtd_songs}', 'GET')
+        for n, song in enumerate(top_tracks['items']):
+            formater_song = f"spotify:track:{song['id']}"
+            music = f"{n+1}. {song['name']} - " 
+            artist = ''
+            for a, artists in enumerate(top_tracks['items'][n]['artists']):
+                if a+1 != len(top_tracks['items'][n]['artists']):
+                    text1 = f"{artists['name']}, " 
+                else:
+                    text1 = f"{artists['name']}" 
+                artist += text1
+            result += music + artist
+            songs.append(formater_song)
+            if n != qtd_songs-1:
+                result += os.linesep
+            # print(song['artists'][0]['name'])
+        listen_songs(songs, discord_user)
+        return f'**TOP {qtd_songs} MÚSICAS MAIS OUVIDAS DESTE MÊS:**{os.linesep}' + result
+    except KeyError:
+        token = refresh_token(discord_user)
+        top_tracks = web_api(token, f'v1/me/top/tracks?time_range=short_term&limit={qtd_songs}', 'GET')
         for n, song in enumerate(top_tracks['items']):
             formater_song = f"spotify:track:{song['id']}"
             music = f"{n+1}. {song['name']} - " 
@@ -99,7 +114,7 @@ def top_songs(qtd_songs, discord_user):
         return f'**TOP {qtd_songs} MÚSICAS MAIS OUVIDAS DESTE MÊS:**{os.linesep}' + result
     except:
         return 'Não há músicas.'
-# print(top_songs(5, 'bru09'))
+# print(top_songs(5, 'Lukitas25'))
 
 def recomendation(qtd_songs, discord_user):
     token = autorization(discord_user)
