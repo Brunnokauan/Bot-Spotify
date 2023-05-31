@@ -1,28 +1,25 @@
 from access import web_api, authorization, refresh_token
 import os
 
-def listen_songs(songs:list, discord_user):
-    token = authorization(discord_user)
-
+def listen_songs(songs:list, token, discord_user):
     body = {
         "uris": songs,
         "position_ms": 0
     }
 
     try:
-        res = web_api(token, f"v1/me/player/play", 'PUT', body)
+        res = web_api(token, f"v1/me/player/play", "PUT", body)
         if res == 204:
             return "Play music!"
         else:
             token = refresh_token(discord_user)
-            res = web_api(token, f"v1/me/player/play", 'PUT', body)
-            if res == 204:
-                return "Play music!"
+            res = web_api(token, f"v1/me/player/play", "PUT", body)
+            # if res == 204:
+            #     return "Play music!"
     except:
         return "Erro ao repoduzir."
 
-def top_songs(qtd_songs, discord_user:str):
-    token = authorization(discord_user)
+def top_songs(token, qtd_songs, discord_user:str):
     result = ''
     songs = []
     try:
@@ -62,7 +59,7 @@ def top_songs(qtd_songs, discord_user:str):
             if n != qtd_songs-1:
                 result += os.linesep
             # print(song['artists'][0]['name'])
-        listen_songs(songs, discord_user)
+        listen_songs(songs, token, discord_user)
         return f"**TOP {qtd_songs} MÚSICAS MAIS OUVIDAS DESTE MÊS:**{os.linesep}" + result
     except:
         return "Não há músicas."
@@ -70,7 +67,7 @@ def top_songs(qtd_songs, discord_user:str):
 
 def recomendation(qtd_songs, discord_user):
     token = authorization(discord_user)
-    top_songs = web_api(token, f"v1/me/top/tracks?time_range=short_term&limit={qtd_songs}", "GET")
+    top_songs = web_api(token, f"v1/me/top/tracks?time_range=short_term&limit=5", "GET")
     songs = []
     for song in top_songs['items']:
         song_id = f"{song['id']}"
@@ -99,8 +96,7 @@ def recomendation(qtd_songs, discord_user):
     # return f"**{qtd_songs} MÚSICAS RECOMENDADAS PARA VOCÊ:**{os.linesep}" + result
 recomendation(8, 'bru09')
 
-def pause_songs(discord_user):
-    token = authorization(discord_user)
+def pause_songs(token, discord_user):
     try:
         res = web_api(token, f"v1/me/player/pause", 'PUT')
         if res == 204:
@@ -113,8 +109,7 @@ def pause_songs(discord_user):
     except:
         return "Erro ao pausar a música"
 
-def playback_shuflle(discord_user):
-    token = authorization(discord_user)
+def playback_shuflle(token, discord_user):
     try:
         res = web_api(token, f"v1/me/player/shuffle?state=true", 'PUT')
         if res == 204:

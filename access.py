@@ -15,12 +15,16 @@ def register_user(user_discord:str, token:str, refresh_token:str):
     try:
         cnx = mysql.connector.connect(user=user, password=password, host=host, database=database)
         sql = f"INSERT INTO user_discord (display_name, access_token, refresh_token, created_at, updated_at) VALUES (\"{user_discord}\", \"{token}\", \"{refresh_token}\", NOW(), NOW())"
+
         cursor = cnx.cursor()
         cursor.execute(sql)
         cnx.commit()
+
         cursor.close()
         cnx.close()
-        return f"Usuário {user_discord} registrado com sucesso!"
+
+        print(f"Usuário {user_discord} registrado com sucesso!")
+        return f"Seu usuário {user_discord} foi registrado nos meus dados. Aproveite o som!"
     except:
         return "Erro ao registrar usuário."
 
@@ -28,8 +32,10 @@ def refresh_token(user_discord):
     load_dotenv()
     client_id = os.getenv("CLIENT_ID")
     client_secret = os.getenv("CLIENT_SECRET")
+
     cnx = mysql.connector.connect(user=user, password=password, host=host, database=database)
     cursor = cnx.cursor()
+
     query = f"SELECT refresh_token FROM user_discord WHERE display_name=\"{user_discord}\""
     cursor.execute(query)
 
@@ -51,8 +57,8 @@ def refresh_token(user_discord):
 
     query2 = f"UPDATE user_discord SET access_token=\"{res.json()['access_token']}\", updated_at=NOW() WHERE display_name=\"{user_discord}\""
     cursor.execute(query2)
-    
     cnx.commit()
+    
     cursor.close()
     cnx.close()
     return res.json()['access_token']
@@ -62,7 +68,6 @@ def authorization(user_discord):
     cursor = cnx.cursor()
 
     query = f"SELECT access_token FROM user_discord WHERE display_name=\"{user_discord}\""
-
     cursor.execute(query)
 
     for token in cursor:

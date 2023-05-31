@@ -1,7 +1,7 @@
 import discord
 from discord import app_commands
 from commands import top_songs, pause_songs, playback_shuflle, recomendation
-from access import register_user,authorization
+from access import register_user, authorization
 import os
 from dotenv import load_dotenv
 
@@ -9,6 +9,7 @@ load_dotenv()
 
 token_bot = os.getenv("TOKEN_BOT")
 id_servidor = os.getenv("SERVIDOR_ID")
+error_message = """Não encontrei você nos meus dados. Você pode se registrar acessando esse link: https://authorization-bot-spotify-homologation.up.railway.app/"""
 
 class MyClient(discord.Client):
     async def on_ready(self):
@@ -37,8 +38,12 @@ async def register(interaction: discord.Interaction, access_token:str, refresh_t
 @tree.command(guild=discord.Object(id=id_servidor), name="top-songs", description="Top músicas mais ouvidas deste mês. Padrão: 5")
 async def topSongs(interaction: discord.Interaction, qtd:int=5):
     user = interaction.user.display_name
-    print(f"Message from {user}: /top-songs")  
-    await interaction.response.send_message(top_songs(qtd, user), ephemeral=True)
+    print(f"Message from {user}: /top-songs")
+    token = authorization(user)
+    if token == None:
+        await interaction.response.send_message(error_message ,ephemeral=True)
+    else:  
+        await interaction.response.send_message(top_songs(token, qtd, user), ephemeral=True)
 
 # @tree.command(guild=discord.Object(id=id_servidor), name='play', description='Tocar uma playlist ou álbum.')
 # async def playSongs(interaction: discord.Interaction, playlist:str=None, album:str=None):
@@ -48,13 +53,21 @@ async def topSongs(interaction: discord.Interaction, qtd:int=5):
 async def pauseSong(interaction: discord.Interaction):
     user = interaction.user.display_name
     print(f"Message from {user}: /pause") 
-    await interaction.response.send_message(pause_songs(user), ephemeral=True)
+    token = authorization(user)
+    if token == None:
+        await interaction.response.send_message(error_message ,ephemeral=True)
+    else:
+        await interaction.response.send_message(pause_songs(token, user), ephemeral=True)
 
 @tree.command(guild=discord.Object(id=id_servidor), name="playback-shuffle", description="Toca de modo aleatório.")
 async def playbackShuffle(interaction: discord.Interaction):
     user = interaction.user.display_name
-    print(f"Message from {user}: /playback-shuffle")  
-    await interaction.response.send_message(playback_shuflle(user) ,ephemeral=True)
+    print(f"Message from {user}: /playback-shuffle")
+    token = authorization(user)
+    if token == None:
+        await interaction.response.send_message(error_message ,ephemeral=True)
+    else: 
+        await interaction.response.send_message(playback_shuflle(token, user) ,ephemeral=True)
 
 @tree.command(guild=discord.Object(id=id_servidor), name="recomendation-songs", description="Recomendações de músicas baseadas nos seus topSongs.")
 async def recomandationsSongs(interaction: discord.Interaction, qtd:int=5):
