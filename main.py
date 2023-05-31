@@ -1,7 +1,7 @@
 import discord
 from discord import app_commands
 from commands import top_songs, pause_songs, playback_shuflle, recomendation
-from access import register_user
+from access import register_user,authorization
 import os
 from dotenv import load_dotenv
 
@@ -57,14 +57,14 @@ async def playbackShuffle(interaction: discord.Interaction):
     await interaction.response.send_message(playback_shuflle(user) ,ephemeral=True)
 
 @tree.command(guild=discord.Object(id=id_servidor), name="recomendation-songs", description="Recomendações de músicas baseadas nos seus topSongs.")
-async def playbackShuffle(interaction: discord.Interaction, qtd:int=5):
+async def recomandationsSongs(interaction: discord.Interaction, qtd:int=5):
     user = interaction.user.display_name
     print(f"Message from {user}: /recomendation-songs")
-    token = authorization(discord_user)
-    if token == None:
-        await interaction.response.send_message("Não encontrei você no meu dados." ,ephemeral=True)
-        await interaction.response.send_message("Você pode se registrar nesse link: https://authorization-bot-spotify-homologation.up.railway.app/" ,ephemeral=True)
-    else:
-        await interaction.response.send_message(recomendation(token, qtd, user) ,ephemeral=True)
+    # token = authorization(user)
+    # if token == None:
+    #     await interaction.response.send_message("Não encontrei você no meu dados." ,ephemeral=True)
+    #     await interaction.response.send_message("Você pode se registrar nesse link: https://authorization-bot-spotify-homologation.up.railway.app/" ,ephemeral=True)
+    # else:
+    await interaction.response.send_message(recomendation(qtd, user) ,ephemeral=True)
 
 client.run(token_bot)

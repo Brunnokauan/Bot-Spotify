@@ -68,31 +68,36 @@ def top_songs(qtd_songs, discord_user:str):
         return "Não há músicas."
 # print(top_songs(5, 'Lukitas25'))
 
-def recomendation(token, qtd_songs, discord_user):
+def recomendation(qtd_songs, discord_user):
+    token = authorization(discord_user)
     top_songs = web_api(token, f"v1/me/top/tracks?time_range=short_term&limit={qtd_songs}", "GET")
     songs = []
     for song in top_songs['items']:
         song_id = f"{song['id']}"
         songs.append(song_id)
+    print(songs)
 
-    new_songs = web_api(token, f"v1/recommendations?limit={qtd_songs}&seed_tracks={','.join(songs)}", 'GET')
+    # new_songs = web_api(token, f"v1/recommendations?limit={qtd_songs}&seed_tracks={','.join(songs)}", "GET")
+
+    # print(new_songs)
     
-    result = ''
-    for n, song in enumerate(new_songs['tracks']):
-        music = f"{n+1}. {song['name']} - " 
-        artist = ''
-        for a, artists in enumerate(new_songs['tracks'][n]['artists']):
-            if a+1 != len(new_songs['tracks'][n]['artists']):
-                text1 = f"{artists['name']}, " 
-            else:
-                text1 = f"{artists['name']}" 
-            artist += text1
-        result += music + artist
-        if n != qtd_songs-1:
-            result += os.linesep
-        # print(song['artists'][0]['name'])
+    # result = ''
+    # for n, song in enumerate(new_songs['tracks']):
+    #     music = f"{n+1}. {song['name']} - " 
+    #     artist = ''
+    #     for a, artists in enumerate(new_songs['tracks'][n]['artists']):
+    #         if a+1 != len(new_songs['tracks'][n]['artists']):
+    #             text1 = f"{artists['name']}, " 
+    #         else:
+    #             text1 = f"{artists['name']}" 
+    #         artist += text1
+    #     result += music + artist
+    #     if n != qtd_songs-1:
+    #         result += os.linesep
+    #     # print(song['artists'][0]['name'])
     
-    return f"**{qtd_songs} MÚSICAS RECOMENDADAS PARA VOCÊ:**{os.linesep}" + result
+    # return f"**{qtd_songs} MÚSICAS RECOMENDADAS PARA VOCÊ:**{os.linesep}" + result
+recomendation(8, 'bru09')
 
 def pause_songs(discord_user):
     token = authorization(discord_user)
