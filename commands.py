@@ -1,4 +1,4 @@
-from access import web_api, authorization, refresh_token
+from access import web_api, refresh_token
 import os
 
 def listen_songs(songs:list, token, discord_user):
