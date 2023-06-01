@@ -1,7 +1,7 @@
 from access import web_api, refresh_token
 import os
 
-def listen_songs(songs:list, token, discord_user):
+def listen_songs(token, songs:list, discord_user):
     body = {
         "uris": songs,
         "position_ms": 0
@@ -14,8 +14,8 @@ def listen_songs(songs:list, token, discord_user):
         else:
             token = refresh_token(discord_user)
             res = web_api(token, f"v1/me/player/play", "PUT", body)
-            # if res == 204:
-            #     return "Play music!"
+            if res == 204:
+                return "Play music!"
     except:
         return "Erro ao repoduzir."
 
@@ -39,7 +39,7 @@ def top_songs(token, qtd_songs, discord_user:str):
             if n != qtd_songs-1:
                 result += os.linesep
             # print(song['artists'][0]['name'])
-        listen_songs(songs, discord_user)
+        listen_songs(token, songs, discord_user)
         return f"**TOP {qtd_songs} MÚSICAS MAIS OUVIDAS DESTE MÊS:**{os.linesep}" + result
     except KeyError:
         token = refresh_token(discord_user)
@@ -67,6 +67,16 @@ def top_songs(token, qtd_songs, discord_user:str):
 
 def recomendation(token, qtd_songs, discord_user):
     try:
+        top_songs = web_api(token, f"v1/me/top/tracks?time_range=short_term&limit=5", "GET")
+        songs = []
+        for song in top_songs['items']:
+            song_id = f"{song['id']}"
+            songs.append(song_id)
+        # print(songs)
+
+        new_songs = web_api(token, f"v1/recommendations?limit={qtd_songs}&seed_tracks={','.join(songs)}", "GET")
+    except KeyError:
+        token = refresh_token(discord_user)
         top_songs = web_api(token, f"v1/me/top/tracks?time_range=short_term&limit=5", "GET")
         songs = []
         for song in top_songs['items']:
