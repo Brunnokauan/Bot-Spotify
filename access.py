@@ -10,11 +10,12 @@ user = os.getenv("USER")
 password = os.getenv("PASSWORD")
 host = os.getenv("HOST")
 database = os.getenv("DATABASE")
+table = os.getenv("TABLE")
 
 def register_user(user_discord:str, token:str, refresh_token:str):
     try:
         cnx = mysql.connector.connect(user=user, password=password, host=host, database=database)
-        sql = f"INSERT INTO user_discord (display_name, access_token, refresh_token, created_at, updated_at) VALUES (\"{user_discord}\", \"{token}\", \"{refresh_token}\", NOW(), NOW())"
+        sql = f"INSERT INTO {table} (display_name, access_token, refresh_token, created_at, updated_at) VALUES (\"{user_discord}\", \"{token}\", \"{refresh_token}\", NOW(), NOW())"
 
         cursor = cnx.cursor()
         cursor.execute(sql)
@@ -36,7 +37,7 @@ def refresh_token(user_discord):
     cnx = mysql.connector.connect(user=user, password=password, host=host, database=database)
     cursor = cnx.cursor()
 
-    query = f"SELECT refresh_token FROM user_discord WHERE display_name=\"{user_discord}\""
+    query = f"SELECT refresh_token FROM {table} WHERE display_name=\"{user_discord}\""
     cursor.execute(query)
 
     for token in cursor:
@@ -55,7 +56,7 @@ def refresh_token(user_discord):
     # json_result = json.loads(res.content)
     # token = json_result
 
-    query2 = f"UPDATE user_discord SET access_token=\"{res.json()['access_token']}\", updated_at=NOW() WHERE display_name=\"{user_discord}\""
+    query2 = f"UPDATE {table} SET access_token=\"{res.json()['access_token']}\", updated_at=NOW() WHERE display_name=\"{user_discord}\""
     cursor.execute(query2)
     cnx.commit()
     
@@ -67,7 +68,7 @@ def authorization(user_discord):
     cnx = mysql.connector.connect(user=user, password=password, host=host, database=database)
     cursor = cnx.cursor()
 
-    query = f"SELECT access_token FROM user_discord WHERE display_name=\"{user_discord}\""
+    query = f"SELECT access_token FROM {table} WHERE display_name=\"{user_discord}\""
     cursor.execute(query)
 
     for token in cursor:
