@@ -1,5 +1,6 @@
 from access import web_api, refresh_token
 import os
+# from access import authorization
 
 def listen_songs(token, songs:list, discord_user):
     body = {
@@ -59,7 +60,7 @@ def top_songs(token, qtd_songs, discord_user:str):
             if n != qtd_songs-1:
                 result += os.linesep
             # print(song['artists'][0]['name'])
-        listen_songs(songs, token, discord_user)
+        listen_songs(token, songs, discord_user)
         return f"**TOP {qtd_songs} MÚSICAS MAIS OUVIDAS DESTE MÊS:**{os.linesep}" + result
     except:
         return "Não há músicas."
@@ -88,10 +89,14 @@ def recomendation(token, qtd_songs, discord_user):
     except:
         return "Erro em listar as músicas"
 
-    # print(new_songs)
+    # for n,id in enumerate(new_songs['tracks']):
+    #     print(id['id'])
+    #     print(new_songs['tracks'][n])
     
     result = ''
+    tracks_id = []
     for n, song in enumerate(new_songs['tracks']):
+        formater_track = f"spotify:track:{song['id']}"
         music = f"{n+1}. {song['name']} - " 
         artist = ''
         for a, artists in enumerate(new_songs['tracks'][n]['artists']):
@@ -101,12 +106,15 @@ def recomendation(token, qtd_songs, discord_user):
                 text1 = f"{artists['name']}" 
             artist += text1
         result += music + artist
+        tracks_id.append(formater_track)
         if n != qtd_songs-1:
             result += os.linesep
         # print(song['artists'][0]['name'])
     
+    listen_songs(token, tracks_id, discord_user)
     return f"**{qtd_songs} MÚSICAS RECOMENDADAS PARA VOCÊ:**{os.linesep}" + result
-# print(recomendation(10, 'bru09'))
+# token = authorization('bru09')
+# print(recomendation(token, 5, 'bru09'))
 
 def pause_songs(token, discord_user):
     try:
