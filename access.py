@@ -11,11 +11,12 @@ password = os.getenv("PASSWORD")
 host = os.getenv("HOST")
 database = os.getenv("DATABASE")
 table = os.getenv("TABLE")
-port = os.getenv("PORT")
+# port = os.getenv("PORT")
 
 def register_user(user_discord:str, token:str, refresh_token:str):
     try:
-        cnx = mysql.connector.connect(user=user, password=password, host=host, database=database, port=port)
+        # cnx = mysql.connector.connect(user=user, password=password, host=host, database=database, port=port) # DEV
+        cnx = mysql.connector.connect(user=user, password=password, host=host, database=database) # NUNVEM
         sql = f"INSERT INTO {table} (display_name, access_token, refresh_token, created_at, updated_at) VALUES (\"{user_discord}\", \"{token}\", \"{refresh_token}\", NOW(), NOW())"
 
         cursor = cnx.cursor()
@@ -35,7 +36,8 @@ def refresh_token(user_discord):
     client_id = os.getenv("CLIENT_ID")
     client_secret = os.getenv("CLIENT_SECRET")
 
-    cnx = mysql.connector.connect(user=user, password=password, host=host, database=database, port=port)
+    # cnx = mysql.connector.connect(user=user, password=password, host=host, database=database, port=port) # DEV
+    cnx = mysql.connector.connect(user=user, password=password, host=host, database=database) # NUNVEM
     cursor = cnx.cursor()
 
     query = f"SELECT refresh_token FROM {table} WHERE display_name=\"{user_discord}\""
@@ -66,7 +68,8 @@ def refresh_token(user_discord):
     return res.json()['access_token']
 
 def authorization(user_discord):
-    cnx = mysql.connector.connect(user=user, password=password, host=host, database=database, port=port)
+    # cnx = mysql.connector.connect(user=user, password=password, host=host, database=database, port=port) # DEV
+    cnx = mysql.connector.connect(user=user, password=password, host=host, database=database) # NUNVEM
     cursor = cnx.cursor()
 
     query = f"SELECT access_token FROM {table} WHERE display_name=\"{user_discord}\""

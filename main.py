@@ -1,5 +1,6 @@
 import discord
 from discord import app_commands
+from discord.ext import commands
 from commands import top_songs, pause_songs, playback_shuflle, recomendation, search_music
 from access import register_user, authorization
 import os
@@ -26,6 +27,13 @@ intents = discord.Intents.default()
 intents.message_content = True
 
 client = MyClient(intents=intents)
+
+# client2 = commands.Bot(command_prefix = '/', intents=intents)
+
+# client2.command()
+# async def embed(ctx):
+    
+#     await ctx.send(embed = embedTest)
 
 tree = app_commands.CommandTree(client)
 # Digita comando
@@ -79,5 +87,17 @@ async def recomandationsSongs(interaction: discord.Interaction, qtd:int=5):
         await interaction.response.send_message(error_message ,ephemeral=True)
     else:
         await interaction.response.send_message(recomendation(token, qtd, user) ,ephemeral=True)
+
+@tree.command(guild=discord.Object(id=id_servidor), name="embeds", description="Mostra como seria um embed")
+async def embed(interaction: discord.Interaction):
+    user = interaction.user.display_name
+    print(f"Message from {user}: /embed")
+    embedTest = discord.Embed(
+        title='Titulo',
+        description='Descrição do Embed',
+        color=discord.Colour.light_embed()
+    )
+    await interaction.response.send_message(embed=embedTest ,ephemeral=True)
+    
 
 client.run(token_bot)
