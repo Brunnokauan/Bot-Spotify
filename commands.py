@@ -1,6 +1,16 @@
 from access import web_api, refresh_token
 import os
-# from access import authorization
+from access import authorization
+
+def duration_music(ms:int):
+    minutos = ms//60000
+    segundos = str((ms%60000)//1000)
+
+    if len(segundos) == 1:
+        segundos = '0' + f'{segundos}'
+
+    return f'{minutos}:{segundos}'
+# duration_music(219453)
 
 def listen_songs(token, songs:list, discord_user):
     body = {
@@ -141,3 +151,47 @@ def playback_shuflle(token, discord_user):
                 return "Músicas em modo aleatório ativado."
     except:
         return "Erro ao ativar lista de reprodução aleatória."
+    
+def search_music(q:str, discord_user:str):
+    try:
+        token = authorization(discord_user)
+        q.replace(' ','+')
+        res = web_api(token, f"v1/search?q={q}&type=track&limit=5", "GET")
+        result = ''
+        for n,info in enumerate(res['tracks']['items']):
+            music = f"{n+1}. {info['name']} - "
+            artists = ''
+            for n2,info2 in enumerate(res['tracks']['items'][n]['artists']):
+                if n2+1 != len(res['tracks']['items'][n]['artists']):
+                    a = f"{info2['name']}, "
+                else:
+                    a = f"{info2['name']} - "
+                artists += a
+            result += music + artists + duration_music(info['duration_ms'])
+            if n < 4:
+                result += os.linesep
+        return result
+    except KeyError:
+        token = refresh_token(discord_user)
+        q.replace(' ','+')
+        res = web_api(token, f"v1/search?q={q}&type=track&limit=5", "GET")
+        result = ''
+        for n,info in enumerate(res['tracks']['items']):
+            music = f"{n+1}. {info['name']} - "
+            artists = ''
+            for n2,info2 in enumerate(res['tracks']['items'][n]['artists']):
+                if n2+1 != len(res['tracks']['items'][n]['artists']):
+                    a = f"{info2['name']}, "
+                else:
+                    a = f"{info2['name']} - "
+                artists += a
+            result += music + artists + duration_music(info['duration_ms'])
+            if n < 4:
+                result += os.linesep
+        return result
+    except:
+        return 'Erro ao encontrar a música.'
+
+    
+# print(search_music('only one'))
+

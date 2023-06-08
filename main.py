@@ -1,6 +1,6 @@
 import discord
 from discord import app_commands
-from commands import top_songs, pause_songs, playback_shuflle, recomendation
+from commands import top_songs, pause_songs, playback_shuflle, recomendation, search_music
 from access import register_user, authorization
 import os
 from dotenv import load_dotenv
@@ -45,10 +45,11 @@ async def topSongs(interaction: discord.Interaction, qtd:int=5):
     else:  
         await interaction.response.send_message(top_songs(token, qtd, user), ephemeral=True)
 
-# @tree.command(guild=discord.Object(id=id_servidor), name='play', description='Tocar uma playlist ou álbum.')
-# async def playSongs(interaction: discord.Interaction, playlist:str=None, album:str=None):
-#     await interaction.response.send_message(listen_songs(), ephemeral=True)
-
+@tree.command(guild=discord.Object(id=id_servidor), name='play', description='Toca uma música especifica.')
+async def playSongs(interaction: discord.Interaction, music:str):
+    user = interaction.user.display_name
+    await interaction.response.send_message(search_music(music, user))
+    
 @tree.command(guild=discord.Object(id=id_servidor), name="pause", description="Pausa a música.")
 async def pauseSong(interaction: discord.Interaction):
     user = interaction.user.display_name
