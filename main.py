@@ -1,16 +1,17 @@
 import discord
 from discord import app_commands
-from discord.ext import commands
 from commands import top_songs, pause_songs, playback_shuflle, recomendation, search_music
 from access import register_user, authorization
 import os
 from dotenv import load_dotenv
+from buttons import *
+import songs
 
 load_dotenv()
 
 token_bot = os.getenv("TOKEN_BOT")
 id_servidor = os.getenv("SERVIDOR_ID")
-error_message = """Não encontrei você nos meus dados. Você pode se registrar acessando esse link: https://authorization-bot-spotify-homologation.up.railway.app/"""
+error_message = """Não encontrei você nos meus dados. Você pode se registrar acessando esse link: https://authorization-spotify.onrender.com/"""
 
 class MyClient(discord.Client):
     async def on_ready(self):
@@ -28,13 +29,6 @@ intents.message_content = True
 
 client = MyClient(intents=intents)
 
-# client2 = commands.Bot(command_prefix = '/', intents=intents)
-
-# client2.command()
-# async def embed(ctx):
-    
-#     await ctx.send(embed = embedTest)
-
 tree = app_commands.CommandTree(client)
 # Digita comando
 @tree.command(guild=discord.Object(id=id_servidor), name="register", description="Registra seu usuário.")
@@ -51,12 +45,21 @@ async def topSongs(interaction: discord.Interaction, qtd:int=5):
     if token == None:
         await interaction.response.send_message(error_message ,ephemeral=True)
     else:  
-        await interaction.response.send_message(top_songs(token, qtd, user), ephemeral=True)
+        e, s = top_songs(token, qtd)
+        songs.post_top_musics(s)
+        await interaction.response.send_message(embed=e, view=ButtonsTopSongs(), ephemeral=True)
 
 @tree.command(guild=discord.Object(id=id_servidor), name='play', description='Toca uma música especifica.')
 async def playSongs(interaction: discord.Interaction, music:str):
     user = interaction.user.display_name
-    await interaction.response.send_message(search_music(music, user))
+    print(f"Message from {user}: /top-songs")
+    token = authorization(user)
+    if token == None:
+        await interaction.response.send_message(error_message ,ephemeral=True)
+    else:
+        e, s = search_music(token, music)
+        songs.post_track(s)
+        await interaction.response.send_message(embed=e, view=ButtonsPlays(), ephemeral=True)
     
 @tree.command(guild=discord.Object(id=id_servidor), name="pause", description="Pausa a música.")
 async def pauseSong(interaction: discord.Interaction):
@@ -66,17 +69,17 @@ async def pauseSong(interaction: discord.Interaction):
     if token == None:
         await interaction.response.send_message(error_message ,ephemeral=True)
     else:
-        await interaction.response.send_message(pause_songs(token, user), ephemeral=True)
+        await interaction.response.send_message(pause_songs(token), ephemeral=True)
 
-@tree.command(guild=discord.Object(id=id_servidor), name="playback-shuffle", description="Toca de modo aleatório.")
-async def playbackShuffle(interaction: discord.Interaction):
-    user = interaction.user.display_name
-    print(f"Message from {user}: /playback-shuffle")
-    token = authorization(user)
-    if token == None:
-        await interaction.response.send_message(error_message ,ephemeral=True)
-    else: 
-        await interaction.response.send_message(playback_shuflle(token, user) ,ephemeral=True)
+# @tree.command(guild=discord.Object(id=id_servidor), name="playback-shuffle", description="Toca de modo aleatório.")
+# async def playbackShuffle(interaction: discord.Interaction):
+#     user = interaction.user.display_name
+#     print(f"Message from {user}: /playback-shuffle")
+#     token = authorization(user)
+#     if token == None:
+#         await interaction.response.send_message(error_message, ephemeral=True)
+#     else: 
+#         await interaction.response.send_message(playback_shuflle(token) ,ephemeral=True)
 
 @tree.command(guild=discord.Object(id=id_servidor), name="recomendation-songs", description="Recomendações de músicas baseadas nos seus topSongs. Padrão: 5")
 async def recomandationsSongs(interaction: discord.Interaction, qtd:int=5):
@@ -86,18 +89,8 @@ async def recomandationsSongs(interaction: discord.Interaction, qtd:int=5):
     if token == None:
         await interaction.response.send_message(error_message ,ephemeral=True)
     else:
-        await interaction.response.send_message(recomendation(token, qtd, user) ,ephemeral=True)
-
-@tree.command(guild=discord.Object(id=id_servidor), name="embeds", description="Mostra como seria um embed")
-async def embed(interaction: discord.Interaction):
-    user = interaction.user.display_name
-    print(f"Message from {user}: /embed")
-    embedTest = discord.Embed(
-        title='Titulo',
-        description='Descrição do Embed',
-        color=discord.Colour.light_embed()
-    )
-    await interaction.response.send_message(embed=embedTest ,ephemeral=True)
+        e, s = recomendation(token, qtd)
+        s = songs.post_recomendations_musics(s)
+        await interaction.response.send_message(embed=e, view=ButtonsRecomendationsSongs() ,ephemeral=True)
     
-
 client.run(token_bot)
