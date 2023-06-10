@@ -27,9 +27,13 @@ def listen_songs(token, songs:list):
     }
 
     try:
+        message_error = """Ops, erro! Tente novamente. Certifique-se de ter um dispositivo ativo.
+        Se o erro persistir entre em contato com meus desenvolvedores."""
         res = web_api(token, f"v1/me/player/play", "PUT", body)
         if res == 204:
             return "Play music!"
+        elif res >= 400 and res < 500:
+            return message_error
     except:
         return "Erro ao repoduzir."
 
