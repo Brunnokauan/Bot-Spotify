@@ -8,7 +8,7 @@ class ButtonsTopSongs(discord.ui.View): # Create a class called MyView that subc
     async def toca_musica(self, interaction: discord.Interaction, button):
         user = interaction.user.display_name
         token = authorization(user)
-        s = songs.top_tracks
+        s = songs.get_top_musics(user)
         await interaction.response.send_message(listen_songs(token, s), ephemeral=True) # Send a message when the button is clicked
 
     @discord.ui.button(label="Pausar Música", style=discord.ButtonStyle.danger)
@@ -26,7 +26,7 @@ class ButtonsRecomendationsSongs(discord.ui.View):
     async def toca_musica(self, interaction: discord.Interaction, button):
         user = interaction.user.display_name
         token = authorization(user)
-        s = songs.recomendations_tracks
+        s = songs.get_recomendations_musics(user)
         await interaction.response.send_message(listen_songs(token, s), ephemeral=True)
 
     @discord.ui.button(label="Pausar Música", style=discord.ButtonStyle.danger)
@@ -44,40 +44,35 @@ class ButtonsPlays(discord.ui.View):
     async def m1(self, interaction: discord.Interaction, button):
         user = interaction.user.display_name
         token = authorization(user)
-        s = songs.specific_track
-        print(s[0])
+        s = songs.get_track(user)
         await interaction.response.send_message(listen_songs(token, [s[0]]), ephemeral=True) 
 
     @discord.ui.button(label="Música 2", style=discord.ButtonStyle.success)
     async def m2(self, interaction: discord.Interaction, button):
         user = interaction.user.display_name
         token = authorization(user)
-        s = songs.specific_track
-        print(s[1])
+        s = songs.get_track(user)
         await interaction.response.send_message(listen_songs(token, [s[1]]), ephemeral=True)
 
     @discord.ui.button(label="Música 3", style=discord.ButtonStyle.success)
     async def m3(self, interaction: discord.Interaction, button):
         user = interaction.user.display_name
         token = authorization(user)
-        s = songs.specific_track
-        print(s[2])
+        s = songs.get_track(user)
         await interaction.response.send_message(listen_songs(token, [s[2]]), ephemeral=True)
     
     @discord.ui.button(label="Música 4", style=discord.ButtonStyle.success)
     async def m4(self, interaction: discord.Interaction, button):
         user = interaction.user.display_name
         token = authorization(user)
-        s = songs.specific_track
-        print(s[3])
+        s = songs.get_track(user)
         await interaction.response.send_message(listen_songs(token, [s[3]]), ephemeral=True)
     
     @discord.ui.button(label="Música 5", style=discord.ButtonStyle.success)
     async def m5(self, interaction: discord.Interaction, button):
         user = interaction.user.display_name
         token = authorization(user)
-        s = songs.specific_track
-        print(s[4])
+        s = songs.get_track(user)
         await interaction.response.send_message(listen_songs(token, [s[4]]), ephemeral=True)
     
     @discord.ui.button(label="Pausar Música", style=discord.ButtonStyle.danger)

@@ -1,5 +1,4 @@
-from access import web_api, refresh_token
-from access import authorization
+from access import web_api
 import discord
 
 def duration_music(ms:int):
@@ -40,17 +39,16 @@ def top_songs(token, qtd_songs):
         top_tracks = web_api(token, f"v1/me/top/tracks?time_range=short_term&limit={qtd_songs}", "GET")
         tracks = []
         for n, song in enumerate(top_tracks['items']):
-            formater_song = f"spotify:track:{song['id']}"
             music = f"{n+1}. {song['name']}" 
             artist = ''
             for a, artists in enumerate(top_tracks['items'][n]['artists']):
                 if a+1 != len(top_tracks['items'][n]['artists']):
                     text1 = f"{artists['name']}, " 
                 else:
-                    text1 = f"{artists['name']}" 
+                    text1 = f"{artists['name']} - {duration_music(song['duration_ms'])}" 
                 artist += text1
             tracks.append({'name': music, 'value': artist})
-            songs.append(formater_song)
+            songs.append(song['uri'])
         return formater_embed(
             titulo=f'TOP {qtd_songs} MÚSICAS MAIS OUVIDAS DESTE MÊS',
             descricao='As suas mais ouvidas nesse mês',
@@ -75,17 +73,16 @@ def recomendation(token, qtd_songs):
     tracks_id = []
     tracks = []
     for n, song in enumerate(new_songs['tracks']):
-        formater_track = f"spotify:track:{song['id']}"
         music = f"{n+1}. {song['name']}" 
         artist = ''
         for a, artists in enumerate(new_songs['tracks'][n]['artists']):
             if a+1 != len(new_songs['tracks'][n]['artists']):
                 text1 = f"{artists['name']}, " 
             else:
-                text1 = f"{artists['name']}" 
+                text1 = f"{artists['name']} - {duration_music(song['duration_ms'])}" 
             artist += text1
         tracks.append({'name': music, 'value': artist})
-        tracks_id.append(formater_track)
+        tracks_id.append(song['uri'])
     embed = formater_embed(
         titulo=f'{qtd_songs} MÚSICAS RECOMENDADAS PARA VOCÊ',
         descricao='Músicas recomendadas a partir das top músicas',
@@ -95,19 +92,23 @@ def recomendation(token, qtd_songs):
 
 def pause_songs(token):
     try:
+        message_error = """Ops, erro! Tente novamente. Certifique-se de ter um dispositivo ativo.
+        Se o erro persistir entre em contato com meus desenvolvedores."""
         res = web_api(token, f"v1/me/player/pause", 'PUT')
         if res == 204:
             return "Música pausada"
+        elif res >= 400 and res < 500:
+            return message_error
     except:
         return "Erro ao pausar a música"
 
-def playback_shuflle(token):
-    try:
-        res = web_api(token, f"v1/me/player/shuffle?state=true", 'PUT')
-        if res == 204:
-            return "Músicas em modo aleatório ativado."
-    except:
-        return "Erro ao ativar lista de reprodução aleatória."
+# def playback_shuflle(token):
+#     try:
+#         res = web_api(token, f"v1/me/player/shuffle?state=true", 'PUT')
+#         if res == 204:
+#             return "Músicas em modo aleatório ativado."
+#     except:
+#         return "Erro ao ativar lista de reprodução aleatória."
 
 def search_music(token, q:str):
     try:
@@ -122,9 +123,9 @@ def search_music(token, q:str):
                 if n2+1 != len(res['tracks']['items'][n]['artists']):
                     a = f"{info2['name']}, "
                 else:
-                    a = f"{info2['name']} - "
+                    a = f"{info2['name']} - {duration_music(info['duration_ms'])}"
                 artists += a
-            tracks.append({'name':music, 'value': artists + duration_music(info['duration_ms'])})
+            tracks.append({'name':music, 'value': artists})
             tracks_id.append(info['uri'])
         return formater_embed(
             titulo=f'MÚSICAS: {q}',

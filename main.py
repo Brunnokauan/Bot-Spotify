@@ -1,6 +1,6 @@
 import discord
 from discord import app_commands
-from commands import top_songs, pause_songs, playback_shuflle, recomendation, search_music
+from commands import top_songs, pause_songs, recomendation, search_music
 from access import register_user, authorization
 import os
 from dotenv import load_dotenv
@@ -46,7 +46,7 @@ async def topSongs(interaction: discord.Interaction, qtd:int=5):
         await interaction.response.send_message(error_message ,ephemeral=True)
     else:  
         e, s = top_songs(token, qtd)
-        songs.post_top_musics(s)
+        songs.post_top_musics(s, user)
         await interaction.response.send_message(embed=e, view=ButtonsTopSongs(), ephemeral=True)
 
 @tree.command(guild=discord.Object(id=id_servidor), name='play', description='Toca uma música especifica.')
@@ -58,7 +58,7 @@ async def playSongs(interaction: discord.Interaction, music:str):
         await interaction.response.send_message(error_message ,ephemeral=True)
     else:
         e, s = search_music(token, music)
-        songs.post_track(s)
+        songs.post_track(s, user)
         await interaction.response.send_message(embed=e, view=ButtonsPlays(), ephemeral=True)
     
 @tree.command(guild=discord.Object(id=id_servidor), name="pause", description="Pausa a música.")
@@ -90,7 +90,7 @@ async def recomandationsSongs(interaction: discord.Interaction, qtd:int=5):
         await interaction.response.send_message(error_message ,ephemeral=True)
     else:
         e, s = recomendation(token, qtd)
-        s = songs.post_recomendations_musics(s)
+        s = songs.post_recomendations_musics(s, user)
         await interaction.response.send_message(embed=e, view=ButtonsRecomendationsSongs() ,ephemeral=True)
     
 client.run(token_bot)
