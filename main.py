@@ -34,9 +34,8 @@ tree = app_commands.CommandTree(client)
 @tree.command(guild=discord.Object(id=id_servidor), name="register", description="Registra seu usuário.")
 async def register(interaction: discord.Interaction, access_token:str, refresh_token:str):
     user = interaction.user.display_name
-    user_formart = user.strip()
     print(f"Message from {user}: /register")  
-    await interaction.response.send_message(register_user(user_formart, access_token, refresh_token), ephemeral=True)
+    await interaction.response.send_message(register_user(user.strip(), access_token, refresh_token), ephemeral=True)
 
 @tree.command(guild=discord.Object(id=id_servidor), name="top-songs", description="Top músicas mais ouvidas deste mês. Padrão: 5")
 async def topSongs(interaction: discord.Interaction, qtd:int=5):
