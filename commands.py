@@ -1,6 +1,7 @@
 from access import web_api
 import discord
 
+# Converte a duração da música de milisegundos para minutos e segundos.
 def duration_music(ms:int):
     minutos = ms//60000
     segundos = str((ms%60000)//1000)
@@ -10,6 +11,7 @@ def duration_music(ms:int):
 
     return f'{minutos}:{segundos}'
 
+# Formata as listas para ficar dentro do embed.
 def formater_embed(titulo:str, descricao:str, tracks:list):
     embed = discord.Embed(
         title=titulo,
@@ -20,6 +22,7 @@ def formater_embed(titulo:str, descricao:str, tracks:list):
         embed.add_field(name=info['name'],value=info['value'], inline=False)
     return embed
 
+# Função que faz tocar a música.
 def listen_songs(token, songs:list):
     body = {
         "uris": songs,
@@ -37,6 +40,7 @@ def listen_songs(token, songs:list):
     except:
         return "Erro ao repoduzir."
 
+# Função que lista as músicas mais tocadas nos últimos 30 dias.
 def top_songs(token, qtd_songs):
     songs = []
     try:
@@ -61,6 +65,7 @@ def top_songs(token, qtd_songs):
     except:
         return "Não há músicas."
 
+# Função lista as músicas recomendadas.
 def recomendation(token, qtd_songs):
     try:
         top_songs = web_api(token, f"v1/me/top/tracks?time_range=short_term&limit=5", "GET")
@@ -94,6 +99,7 @@ def recomendation(token, qtd_songs):
     )
     return embed, tracks_id
 
+# Função que pausa a música.
 def pause_songs(token):
     try:
         message_error = """Ops, erro! Tente novamente. Certifique-se de ter um dispositivo ativo.
@@ -114,6 +120,8 @@ def pause_songs(token):
 #     except:
 #         return "Erro ao ativar lista de reprodução aleatória."
 
+
+#Função que busca uma música específica para tocar.
 def search_music(token, q:str):
     try:
         q.replace(' ','+')

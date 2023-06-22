@@ -13,6 +13,7 @@ token_bot = os.getenv("TOKEN_BOT")
 id_servidor = os.getenv("SERVIDOR_ID")
 error_message = """Não encontrei você nos meus dados. Você pode se registrar acessando esse link: https://authorization-spotify.onrender.com/"""
 
+# Parte resposável por deixar bot online e mostrar comandos.
 class MyClient(discord.Client):
     async def on_ready(self):
         await tree.sync(guild=discord.Object(id=id_servidor))
@@ -30,13 +31,15 @@ intents.message_content = True
 client = MyClient(intents=intents)
 
 tree = app_commands.CommandTree(client)
-# Digita comando
+
+# Comando responsável de registrar usuário para o bot.
 @tree.command(guild=discord.Object(id=id_servidor), name="register", description="Registra seu usuário.")
 async def register(interaction: discord.Interaction, access_token:str, refresh_token:str):
     user = interaction.user.display_name
     print(f"Message from {user}: /register")  
     await interaction.response.send_message(register_user(user.strip(), access_token, refresh_token), ephemeral=True)
 
+# Comando responsável de listar as músicas mais escutadas.
 @tree.command(guild=discord.Object(id=id_servidor), name="top-songs", description="Top músicas mais ouvidas deste mês. Padrão: 5")
 async def topSongs(interaction: discord.Interaction, qtd:int=5):
     user = interaction.user.display_name
@@ -49,6 +52,7 @@ async def topSongs(interaction: discord.Interaction, qtd:int=5):
         songs.post_top_musics(s, user)
         await interaction.response.send_message(embed=e, view=ButtonsTopSongs(), ephemeral=True)
 
+# Comando responsável por buscar uma música especifica e tocar.
 @tree.command(guild=discord.Object(id=id_servidor), name='play', description='Toca uma música especifica.')
 async def playSongs(interaction: discord.Interaction, music:str):
     user = interaction.user.display_name
@@ -60,7 +64,8 @@ async def playSongs(interaction: discord.Interaction, music:str):
         e, s = search_music(token, music)
         songs.post_track(s, user)
         await interaction.response.send_message(embed=e, view=ButtonsPlays(), ephemeral=True)
-    
+
+# Comando responsável por pausar a música.
 @tree.command(guild=discord.Object(id=id_servidor), name="pause", description="Pausa a música.")
 async def pauseSong(interaction: discord.Interaction):
     user = interaction.user.display_name
@@ -81,6 +86,7 @@ async def pauseSong(interaction: discord.Interaction):
 #     else: 
 #         await interaction.response.send_message(playback_shuflle(token) ,ephemeral=True)
 
+# Comando responsável por recomendar músicas.
 @tree.command(guild=discord.Object(id=id_servidor), name="recomendation-songs", description="Recomendações de músicas baseadas nos seus topSongs. Padrão: 5")
 async def recomandationsSongs(interaction: discord.Interaction, qtd:int=5):
     user = interaction.user.display_name

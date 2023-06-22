@@ -3,6 +3,7 @@ from commands import *
 from access import authorization
 import songs
 
+# Parte resposável por mostrar botões do comando top-songs.
 class ButtonsTopSongs(discord.ui.View): # Create a class called MyView that subclasses discord.ui.View
     @discord.ui.button(label="Tocar Música", style=discord.ButtonStyle.primary, emoji="🎵")
     async def toca_musica(self, interaction: discord.Interaction, button):
@@ -21,6 +22,7 @@ class ButtonsTopSongs(discord.ui.View): # Create a class called MyView that subc
     # async def button_callback(self, button, interaction: discord.Interaction):
     #     await interaction.response.send_message("You clicked the button!") # Send a message when the button is clicked
 
+# Parte resposável por mostrar botões do comando recomendations-songs.
 class ButtonsRecomendationsSongs(discord.ui.View):
     @discord.ui.button(label="Tocar Música", style=discord.ButtonStyle.primary, emoji="🎵")
     async def toca_musica(self, interaction: discord.Interaction, button):
@@ -39,6 +41,7 @@ class ButtonsRecomendationsSongs(discord.ui.View):
     # async def button_callback(self, button, interaction: discord.Interaction):
     #     await interaction.response.send_message("You clicked the button!")
 
+# Parte resposável por mostrar botões do comando play.
 class ButtonsPlays(discord.ui.View):
     @discord.ui.button(label="Música 1", style=discord.ButtonStyle.success)
     async def m1(self, interaction: discord.Interaction, button):

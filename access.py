@@ -13,6 +13,7 @@ database = os.getenv("DATABASE")
 table = os.getenv("TABLE")
 port = os.getenv("PORT")
 
+# Função resposável por enviar infomações para a API do Spotify
 def web_api(token, endpoint, method, body=None):
     if (method == "GET"):
         res = requests.get(url=f"https://api.spotify.com/{endpoint}", headers={"Authorization": f"Bearer {token}"})
@@ -35,9 +36,7 @@ def web_api(token, endpoint, method, body=None):
               headers={"Authorization": f"Bearer {token}"})
         return res.status_code
 
-# result = web_api('v1/me','get')
-# print(result)
-
+# Função responsável por registrar o usuário no banco de dados.
 def register_user(user_discord:str, token:str, refresh_token:str):
     try:
         # cnx = mysql.connector.connect(user=user, password=password, host=host, database=database, port=port) # DEV
@@ -56,6 +55,7 @@ def register_user(user_discord:str, token:str, refresh_token:str):
     except:
         return "Erro ao registrar usuário."
 
+# Função responsável por testar o token do usuário, em caso de erro ele realiza um refresh.
 def test_token(token, user_discord):
         res = web_api(token, "v1/me", "GETS")
         if res == 401:
@@ -66,6 +66,7 @@ def test_token(token, user_discord):
         else:
             return None
 
+# Função responsável por realizar refresh no token.
 def refresh_token(user_discord):
     load_dotenv()
     client_id = os.getenv("CLIENT_ID")
@@ -102,6 +103,7 @@ def refresh_token(user_discord):
     cnx.close()
     return res.json()['access_token']
 
+# Função resposável por pegar token do usuário e pedir autorização para API Spotify, para pegar os dados do usuário.
 def authorization(user_discord):
     # cnx = mysql.connector.connect(user=user, password=password, host=host, database=database, port=port) # DEV
     cnx = mysql.connector.connect(user=user, password=password, host=host, database=database) # NUNVEM
